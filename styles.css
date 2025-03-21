@@ -1,0 +1,61 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #C70000;
+    color: white;
+    text-align: center;
+}
+
+#game-container {
+    margin-top: 50px;
+}
+
+button {
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.hidden {
+    display: none;
+}
+
+#scenario-selection, #car-selection, #negotiation, #congratulations, #high-scores {
+    margin-top: 20px;
+}
+
+.car-option {
+    margin: 20px;
+}
+
+.car-option img {
+    width: 200px;
+    height: auto;
+}
+
+#seller-bubble, #player-bubble {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#seller-bubble {
+    background-color: lightgreen;
+    text-align: left;
+}
+
+#player-bubble {
+    background-color: lightblue;
+    text-align: right;
+}
+
+#congratulations img {
+    width: 300px;
+    height: auto;
+}

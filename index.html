@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monopoly Negotiation Master</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <h1>Monopoly Negotiation Master</h1>
+        <button id="start-button">START GAME</button>
+        <div id="scenario-selection" class="hidden">
+            <h2>Choose Your Negotiation Scenario:</h2>
+            <button class="scenario-button" data-scenario="business-merger">Business Merger</button>
+            <button class="scenario-button" data-scenario="salary-negotiation">Salary Negotiation</button>
+            <button class="scenario-button" data-scenario="buy-car">Buy a Car</button>
+            <button id="high-scores-button">High Scores</button>
+        </div>
+        <div id="car-selection" class="hidden">
+            <h2>Select Your Dream Car:</h2>
+            <div class="car-option" data-car="new-car">
+                <img src="new_car.png" alt="New Car">
+                <p>New Car</p>
+            </div>
+            <div class="car-option" data-car="old-car">
+                <img src="old_car.png" alt="Old Car">
+                <p>Old Car</p>
+            </div>
+            <div class="car-option" data-car="antique">
+                <img src="antique.png" alt="Antique Car">
+                <p>Antique Car</p>
+            </div>
+            <button id="back-to-scenarios">Back to Scenarios</button>
+        </div>
+        <div id="negotiation" class="hidden">
+            <div id="seller-bubble">
+                <img src="seller.jpg" alt="Seller">
+                <p id="seller-dialog">🤑 Seller: Welcome! Interested in this car?<br>Initial Price: $50,000</p>
+            </div>
+            <div id="player-bubble">
+                <input type="text" id="offer-input" placeholder="Enter your offer">
+                <button id="propose-offer">Propose Offer</button>
+                <button id="accept-offer">Accept Offer</button>
+            </div>
+            <button id="back-to-car-selection">Back to Car Selection</button>
+        </div>
+        <div id="congratulations" class="hidden">
+            <h2>Congratulations!</h2>
+            <img id="car-image" src="" alt="Car Image">
+            <p id="score-text">Your score is: </p>
+            <button id="back-to-car-selection-from-congrats">Back to Car Selection</button>
+            <button id="back-to-scenarios-from-congrats">Back to Scenarios</button>
+        </div>
+        <div id="high-scores" class="hidden">
+            <h2>High Scores</h2>
+            <p id="high-scores-text"></p>
+            <button id="back-to-scenarios-from-high-scores">Back to Scenarios</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
