@@ -90,7 +90,7 @@ document.getElementById('propose-offer').addEventListener('click', function() {
     const offerInput = document.getElementById('offer-input');
     const offer = parseFloat(offerInput.value.replace(/,/g, ''));
 
-    if (isNaN(offer)) {
+    if (isNaN(offer)) { 
         showInputError(offerInput, 'Please enter a valid number');
         return;
     }
