@@ -28,7 +28,7 @@ let initialPrice = 0;
 let minPrice = 0;
 let agreedPrice = null;
 let negotiationAttempts = 0;
-const maxAttempts = 5;
+let maxAttempts = 5; // Will be re-assigned in startNegotiation
 
 const highScores = JSON.parse(localStorage.getItem('highScores')) || {
   "Business Merger": 0,
@@ -122,6 +122,9 @@ document.getElementById('offer-input').addEventListener('keypress', function(e) 
 function startNegotiation(carType) {
   currentCar = carType;
   negotiationAttempts = 0;
+  
+  // Randomly choose maxAttempts from 1 to 5 for this negotiation
+  maxAttempts = Math.floor(Math.random() * 5) + 1;
 
   const carSpecs = {
     "new_car": { label: "New Car", price: 50000 },
@@ -137,15 +140,14 @@ function startNegotiation(carType) {
     🤑 Seller: Welcome! Interested in this ${carSpecs[carType].label}?<br>
     Initial Price: $${initialPrice.toLocaleString()}
   `;
-  document.getElementById('attempts-counter').textContent = `Attempts left: ${maxAttempts - negotiationAttempts}`;
+  // Remove the attempts counter text from view
 
-  // New: Set the negotiation screen's car image
+  // Set the negotiation screen's car image
   document.getElementById('negotiation-car-image').src = `${carType}.png`;
 }
 
 function handleOffer(offer) {
   const sellerDialog = document.getElementById('seller-dialog');
-  const attemptsCounter = document.getElementById('attempts-counter');
   const acceptButton = document.getElementById('accept-offer');
 
   if (negotiationAttempts >= maxAttempts) {
@@ -156,8 +158,6 @@ function handleOffer(offer) {
     acceptButton.textContent = `Accept $${initialPrice.toLocaleString()}`;
     return;
   }
-
-  attemptsCounter.textContent = `Attempts left: ${maxAttempts - negotiationAttempts}`;
 
   if (offer < minPrice * 0.9) {
     // Very low offer
