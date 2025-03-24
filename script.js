@@ -132,11 +132,15 @@ function startNegotiation(carType) {
   initialPrice = carSpecs[carType].price;
   minPrice = initialPrice * (0.75 + Math.random() * 0.1); // Slight randomization
 
+  // Update seller dialog
   document.getElementById('seller-dialog').innerHTML = `
     🤑 Seller: Welcome! Interested in this ${carSpecs[carType].label}?<br>
     Initial Price: $${initialPrice.toLocaleString()}
   `;
   document.getElementById('attempts-counter').textContent = `Attempts left: ${maxAttempts - negotiationAttempts}`;
+
+  // New: Set the negotiation screen's car image
+  document.getElementById('negotiation-car-image').src = `${carType}.png`;
 }
 
 function handleOffer(offer) {

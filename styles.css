@@ -87,6 +87,14 @@
     margin: 2rem 0;
   }
   
+  .car-option img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+  
   /* Back Buttons */
   .back-button {
     margin-top: 2rem;
@@ -97,6 +105,14 @@
   .negotiation-container {
     max-width: 800px;
     margin: 0 auto;
+  }
+  
+  /* New: Negotiation car image styling */
+  .negotiation-car-img {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 1rem;
+    border-radius: var(--border-radius);
   }
   
   #seller-bubble {
