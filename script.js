@@ -298,37 +298,21 @@ function showTemporaryMessage(message, duration = 2000) {
 // RESET HIGH SCORES FUNCTIONS
 
 function showResetConfirmation() {
-  // Create the confirmation overlay
+  // Create the confirmation overlay using the new CSS styles
   const overlay = document.createElement('div');
   overlay.id = 'reset-confirmation-overlay';
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100vw';
-  overlay.style.height = '100vh';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-  overlay.style.display = 'flex';
-  overlay.style.justifyContent = 'center';
-  overlay.style.alignItems = 'center';
-  overlay.style.zIndex = '1000';
 
-  // Create the modal box
+  // Create the modal box using the new CSS styles
   const modal = document.createElement('div');
   modal.id = 'reset-confirmation-modal';
-  modal.style.backgroundColor = '#fff';
-  modal.style.padding = '20px';
-  modal.style.borderRadius = '5px';
-  modal.style.textAlign = 'center';
   modal.innerHTML = `<p>Are you sure you want to reset your High-Scores?</p>`;
 
   // Create Yes and No buttons
   const yesButton = document.createElement('button');
   yesButton.textContent = 'Yes';
-  yesButton.style.margin = '10px';
 
   const noButton = document.createElement('button');
   noButton.textContent = 'No';
-  noButton.style.margin = '10px';
 
   modal.appendChild(yesButton);
   modal.appendChild(noButton);
