@@ -30,7 +30,7 @@ let agreedPrice = null;
 let negotiationAttempts = 0;
 let maxAttempts = 5; // Will be re-assigned in startNegotiation
 
-const highScores = JSON.parse(localStorage.getItem('highScores')) || {
+let highScores = JSON.parse(localStorage.getItem('highScores')) || {
   "Business Merger": 0,
   "Salary Negotiation": 0,
   "Buy a Car": {
@@ -49,14 +49,17 @@ document.getElementById('high-scores-button').addEventListener('click', () => {
   switchScreen('high-scores');
   updateHighScores();
 });
-document.getElementById('reset-high-scores-button').addEventListener('click', () => highScores = {
-  "Business Merger": 0,
-  "Salary Negotiation": 0,
-  "Buy a Car": {
-    "new_car": 0,
-    "old_car": 0,
-    "antique": 0
-  }
+document.getElementById('reset-high-scores-button').addEventListener('click', () => {
+  highScores = {
+    "Business Merger": 0,
+    "Salary Negotiation": 0,
+    "Buy a Car": {
+      "new_car": 0,
+      "old_car": 0,
+      "antique": 0
+    }
+  };
+  saveHighScores();
 });
 document.getElementById('back-to-scenarios-from-high-scores').addEventListener('click', () => switchScreen('scenario-selection'));
 document.getElementById('back-to-scenarios-from-congrats').addEventListener('click', () => {
