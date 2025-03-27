@@ -16,3 +16,9 @@ This is a web-based **Negotiation Game** developed as part of the **PS379: Negot
 4. Different scenarios have different limits and challenges.  
 
 This project is part of a final-year coursework submission.  
+
+
+
+## changes to be made:
+1. add option to reset highscores
+2. add additional scenarios
