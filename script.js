@@ -30,7 +30,7 @@ let agreedPrice = null;
 let negotiationAttempts = 0;
 let maxAttempts = 5; // Will be re-assigned in startNegotiation
 
-let highScores = JSON.parse(localStorage.getItem('highScores')) || {
+const highScores = JSON.parse(localStorage.getItem('highScores')) || {
   "Business Merger": 0,
   "Salary Negotiation": 0,
   "Buy a Car": {
@@ -49,18 +49,6 @@ document.getElementById('high-scores-button').addEventListener('click', () => {
   switchScreen('high-scores');
   updateHighScores();
 });
-document.getElementById('reset-high-scores-button').addEventListener('click', () => {
-  highScores = {
-    "Business Merger": 0,
-    "Salary Negotiation": 0,
-    "Buy a Car": {
-      "new_car": 0,
-      "old_car": 0,
-      "antique": 0
-    }
-  };
-  saveHighScores();
-});
 document.getElementById('back-to-scenarios-from-high-scores').addEventListener('click', () => switchScreen('scenario-selection'));
 document.getElementById('back-to-scenarios-from-congrats').addEventListener('click', () => {
   switchScreen('scenario-selection');
@@ -70,6 +58,9 @@ document.getElementById('back-to-car-selection-from-congrats').addEventListener(
   switchScreen('car-selection');
   resetNegotiation();
 });
+
+// Reset High Scores button event listener
+document.getElementById('reset-high-scores-button').addEventListener('click', showResetConfirmation);
 
 // Scenario selection
 document.querySelectorAll('.scenario-button').forEach(button => {
@@ -291,7 +282,7 @@ function showInputError(inputElement, message) {
   }, 3000);
 }
 
-function showTemporaryMessage(message) {
+function showTemporaryMessage(message, duration = 2000) {
   const messageElement = document.createElement('div');
   messageElement.className = 'temp-message';
   messageElement.textContent = message;
@@ -301,5 +292,79 @@ function showTemporaryMessage(message) {
     setTimeout(() => {
       messageElement.remove();
     }, 300);
-  }, 2000);
+  }, duration);
+}
+
+// RESET HIGH SCORES FUNCTIONS
+
+function showResetConfirmation() {
+  // Create the confirmation overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'reset-confirmation-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100vw';
+  overlay.style.height = '100vh';
+  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  overlay.style.display = 'flex';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.style.zIndex = '1000';
+
+  // Create the modal box
+  const modal = document.createElement('div');
+  modal.id = 'reset-confirmation-modal';
+  modal.style.backgroundColor = '#fff';
+  modal.style.padding = '20px';
+  modal.style.borderRadius = '5px';
+  modal.style.textAlign = 'center';
+  modal.innerHTML = `<p>Are you sure you want to reset your High-Scores?</p>`;
+
+  // Create Yes and No buttons
+  const yesButton = document.createElement('button');
+  yesButton.textContent = 'Yes';
+  yesButton.style.margin = '10px';
+
+  const noButton = document.createElement('button');
+  noButton.textContent = 'No';
+  noButton.style.margin = '10px';
+
+  modal.appendChild(yesButton);
+  modal.appendChild(noButton);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // Timer to automatically remove the modal after 15 seconds if no response
+  const autoRemoveTimer = setTimeout(() => {
+    if (document.body.contains(overlay)) {
+      document.body.removeChild(overlay);
+    }
+  }, 15000);
+
+  // Yes button click handler
+  yesButton.addEventListener('click', () => {
+    clearTimeout(autoRemoveTimer);
+    performResetHighScores();
+    document.body.removeChild(overlay);
+    // Show success message for 5 seconds
+    showTemporaryMessage("You have successfully reset your High-Scores", 5000);
+  });
+
+  // No button click handler
+  noButton.addEventListener('click', () => {
+    clearTimeout(autoRemoveTimer);
+    document.body.removeChild(overlay);
+  });
+}
+
+function performResetHighScores() {
+  // Reset all high scores to 0
+  highScores["Business Merger"] = 0;
+  highScores["Salary Negotiation"] = 0;
+  highScores["Buy a Car"]["new_car"] = 0;
+  highScores["Buy a Car"]["old_car"] = 0;
+  highScores["Buy a Car"]["antique"] = 0;
+  saveHighScores();
+  updateHighScores();
 }
