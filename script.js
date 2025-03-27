@@ -49,6 +49,15 @@ document.getElementById('high-scores-button').addEventListener('click', () => {
   switchScreen('high-scores');
   updateHighScores();
 });
+document.getElementById('reset-high-scores-button').addEventListener('click', () => highScores = {
+  "Business Merger": 0,
+  "Salary Negotiation": 0,
+  "Buy a Car": {
+    "new_car": 0,
+    "old_car": 0,
+    "antique": 0
+  }
+});
 document.getElementById('back-to-scenarios-from-high-scores').addEventListener('click', () => switchScreen('scenario-selection'));
 document.getElementById('back-to-scenarios-from-congrats').addEventListener('click', () => {
   switchScreen('scenario-selection');
