@@ -70,64 +70,20 @@ button:hover {
   display: none !important;
 }
 
+/* Initial Screen */
+#initial-screen {
+  margin-top: 2rem;
+}
+
 /* Scenario Selection */
 #scenario-selection {
   margin: 2rem 0;
 }
 
-.scenario-options-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+/* Car Selection */
+#car-selection {
   margin: 2rem 0;
 }
-
-.scenario-option {
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.scenario-option:hover {
-  transform: translateY(-5px);
-}
-
-.scenario-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: var(--border-radius);
-  margin-bottom: 1rem;
-}
-
-/* Complex Negotiation Screen */
-.complex-dialog {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  text-align: left;
-}
-
-.complex-dialog strong {
-  color: var(--accent-color);
-}
-
-.stress-meter {
-  height: 10px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 5px;
-  margin: 1rem 0;
-}
-
-.stress-fill {
-  height: 100%;
-  background: var(--accent-color);
-  border-radius: 5px;
-  transition: width 0.3s ease;
-}
-
-/* Car Selection */
 .car-options-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -143,14 +99,31 @@ button:hover {
   margin: 0 auto;
 }
 
-/* Negotiation Bubbles */
-#seller-bubble, #complex-bubble {
+/* Back Buttons */
+.back-button {
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Negotiation Screen */
+.negotiation-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Negotiation image styling */
+.negotiation-car-img {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 1rem;
+  border-radius: var(--border-radius);
+}
+
+#seller-bubble {
   display: flex;
   align-items: center;
   padding: 1.5rem;
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
-  margin: 1rem 0;
+  position: relative;
 }
 
 .seller-avatar img {
@@ -159,6 +132,71 @@ button:hover {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 1.5rem;
+}
+
+#seller-bubble::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 40px;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+  border-right-color: rgba(255, 255, 255, 0.9);
+  border-left: 0;
+  border-top: 0;
+}
+
+#player-bubble {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  background: var(--accent-color);
+  margin-top: 1rem;
+}
+
+#player-bubble::before {
+  content: '';
+  position: absolute;
+  right: -15px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+  border-left-color: var(--accent-color);
+  border-right: 0;
+  border-top: 0;
+}
+
+#offer-input {
+  padding: 1rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 50px;
+  background: transparent;
+  color: white;
+  font-size: 1.1rem;
+  margin-right: 1rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+#offer-input:focus {
+  outline: none;
+  border-color: var(--button-hover);
+}
+
+.offer-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* AI Options Container */
+#ai-options {
+  margin-top: 1rem;
+}
+#ai-options button {
+  margin: 0.5rem;
 }
 
 /* Congratulations Screen */
@@ -191,6 +229,42 @@ button:hover {
   margin: 2rem 0;
 }
 
+#high-scores-text {
+  font-family: 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+/* Button Group */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Transitions */
+.fade-in {
+  animation: fadeIn 0.3s ease-in forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
 /* Confetti */
 .confetti {
   position: absolute;
@@ -206,7 +280,7 @@ button:hover {
   100% { transform: translateY(110vh) rotate(360deg); }
 }
 
-/* Reset Modal */
+/* Reset Confirmation Modal */
 #reset-confirmation-overlay {
   position: fixed;
   top: 0;
@@ -226,4 +300,23 @@ button:hover {
   border-radius: var(--border-radius);
   text-align: center;
   color: var(--text-primary);
+  font-family: 'Poppins', sans-serif;
+}
+
+#reset-confirmation-modal button {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  margin: 10px;
+  background: var(--accent-color);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+#reset-confirmation-modal button:hover {
+  background: var(--button-hover);
+  transform: translateY(-2px);
 }

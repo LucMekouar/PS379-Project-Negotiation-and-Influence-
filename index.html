@@ -20,15 +20,9 @@
     <!-- Scenario Selection -->
     <div id="scenario-selection" class="hidden">
       <h2>Choose Your Negotiation Scenario:</h2>
-      <div class="button-group">
-        <button class="scenario-button" data-scenario="business-merger">Business Merger</button>
-        <button class="scenario-button" data-scenario="corporate-espionage">Corporate Espionage</button>
-        <button class="scenario-button" data-scenario="rogue-ai">Rogue AI</button>
-        <button class="scenario-button" data-scenario="intergalactic-trade">Intergalactic Trade</button>
-        <button class="scenario-button" data-scenario="hostage-situation">Hostage Crisis</button>
-        <button class="scenario-button" data-scenario="buy-car">Buy a Car</button>
-        <button id="high-scores-button">High Scores</button>
-      </div>
+      <button class="scenario-button" data-scenario="buy-car">Buy a Car</button>
+      <button class="scenario-button" data-scenario="rogue-ai">Rogue AI Negotiation</button>
+      <button id="high-scores-button">High Scores</button>
       <button class="back-button" id="back-to-initial-from-scenarios">Main Menu</button>
     </div>
 
@@ -52,39 +46,53 @@
       <button class="back-button" id="back-to-scenarios">Back to Scenarios</button>
     </div>
 
-    <!-- Complex Negotiation Screen -->
-    <div id="complex-negotiation" class="hidden">
+    <!-- Negotiation Screen -->
+    <div id="negotiation" class="hidden">
       <div class="negotiation-container">
-        <img id="scenario-image" src="" alt="Scenario Image" class="scenario-image">
-        <div id="complex-bubble" class="seller-bubble">
+        <!-- Negotiation image (for car or AI) -->
+        <img id="negotiation-car-image" src="" alt="Negotiation Image" class="negotiation-car-img">
+        <div id="seller-bubble">
           <div class="seller-avatar">
-            <img id="negotiator-avatar" src="" alt="Negotiator">
+            <img src="seller.jpg" alt="Negotiator">
           </div>
-          <div class="dialog-content complex-dialog">
-            <p id="complex-dialog-text"></p>
-            <div class="stress-meter">
-              <div class="stress-fill" id="stress-fill"></div>
-            </div>
+          <div class="dialog-content">
+            <p id="seller-dialog"></p>
+            <p class="attempts-counter" id="attempts-counter"></p>
           </div>
         </div>
-        <div class="scenario-options-grid" id="scenario-options"></div>
+        <!-- For Car: offer input; For AI: options will be dynamically injected -->
+        <div id="player-bubble">
+          <input type="text" id="offer-input" placeholder="Enter your offer ($)">
+          <div class="offer-buttons">
+            <button id="propose-offer">Propose</button>
+            <button id="accept-offer">Accept</button>
+          </div>
+          <!-- Container for AI options -->
+          <div id="ai-options" class="hidden"></div>
+        </div>
       </div>
-      <button class="back-button" id="back-to-scenarios-from-complex">Back to Scenarios</button>
-    </div>
-
-    <!-- Original Negotiation Screen -->
-    <div id="negotiation" class="hidden">
-      <!-- ... keep existing car negotiation HTML ... -->
+      <button class="back-button" id="back-to-car-selection">Back</button>
     </div>
 
     <!-- Congratulations Screen -->
     <div id="congratulations" class="hidden">
-      <!-- ... keep existing congrats HTML ... -->
+      <div class="congrats-content">
+        <h2>Negotiation Outcome</h2>
+        <img id="car-image" src="" alt="Outcome Image">
+        <div id="score-text"></div>
+        <div class="button-group">
+          <button class="back-button" id="back-to-car-selection-from-congrats">Try Another Car / AI</button>
+          <button class="back-button" id="back-to-scenarios-from-congrats">Other Scenarios</button>
+        </div>
+      </div>
     </div>
 
     <!-- High Scores -->
     <div id="high-scores" class="hidden">
-      <!-- ... keep existing high scores HTML ... -->
+      <h2>High Scores</h2>
+      <pre id="high-scores-text"></pre>
+      <button id="reset-high-scores-button">Reset High Scores</button>
+      <button class="back-button" id="back-to-scenarios-from-high-scores">Back to Scenarios</button>
     </div>
   </div>
   <script src="script.js"></script>
