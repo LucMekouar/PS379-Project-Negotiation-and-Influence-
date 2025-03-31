@@ -99,6 +99,17 @@ button:hover {
   margin: 0 auto;
 }
 
+/* Salary Role Selection */
+#salary-role-selection {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+}
+#salary-role-selection p {
+  margin-bottom: 1rem;
+}
+
 /* Back Buttons */
 .back-button {
   margin-top: 2rem;
@@ -111,7 +122,7 @@ button:hover {
   margin: 0 auto;
 }
 
-/* Negotiation image styling */
+/* Negotiation Image Styling */
 .negotiation-car-img {
   width: 100%;
   max-width: 300px;
@@ -189,13 +200,16 @@ button:hover {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-/* AI Options Container */
-#ai-options {
+/* Additional container for incentive options (for salary negotiation) */
+#ai-options,
+#salary-incentives {
   margin-top: 1rem;
 }
-#ai-options button {
+#ai-options button,
+#salary-incentives button {
   margin: 0.5rem;
 }
 

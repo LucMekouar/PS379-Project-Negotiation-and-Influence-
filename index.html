@@ -22,6 +22,7 @@
       <h2>Choose Your Negotiation Scenario:</h2>
       <button class="scenario-button" data-scenario="buy-car">Buy a Car</button>
       <button class="scenario-button" data-scenario="rogue-ai">Rogue AI Negotiation</button>
+      <button class="scenario-button" data-scenario="salary-negotiation">Salary Negotiation</button>
       <button id="high-scores-button">High Scores</button>
       <button class="back-button" id="back-to-initial-from-scenarios">Main Menu</button>
     </div>
@@ -46,10 +47,27 @@
       <button class="back-button" id="back-to-scenarios">Back to Scenarios</button>
     </div>
 
+    <!-- Salary Role Selection -->
+    <div id="salary-role-selection" class="hidden">
+      <h2>Salary Negotiation - Choose Your Role</h2>
+      <p>
+        Welcome to the Salary Negotiation Game!<br>
+        You will negotiate with a virtual employer to maximize your salary and benefits.<br>
+        Choose your role:
+      </p>
+      <button class="role-button" data-role="high">
+        High-Quality Employee<br>(Initial Offer: £35,000; Employer Max: £60,000)
+      </button>
+      <button class="role-button" data-role="low">
+        Low-Quality Employee<br>(Initial Offer: £25,000; Employer Max: £40,000)
+      </button>
+      <button class="back-button" id="back-to-scenarios-from-salary-role">Back to Scenarios</button>
+    </div>
+
     <!-- Negotiation Screen -->
     <div id="negotiation" class="hidden">
       <div class="negotiation-container">
-        <!-- Negotiation image (for car or AI) -->
+        <!-- Negotiation image (for car, AI, or salary) -->
         <img id="negotiation-car-image" src="" alt="Negotiation Image" class="negotiation-car-img">
         <div id="seller-bubble">
           <div class="seller-avatar">
@@ -60,15 +78,17 @@
             <p class="attempts-counter" id="attempts-counter"></p>
           </div>
         </div>
-        <!-- For Car: offer input; For AI: options will be dynamically injected -->
+        <!-- For Car: salary input; For AI or Salary: options will be dynamically injected -->
         <div id="player-bubble">
-          <input type="text" id="offer-input" placeholder="Enter your offer ($)">
+          <input type="text" id="offer-input" placeholder="Enter your offer">
           <div class="offer-buttons">
+            <!-- These buttons will be re-purposed based on the scenario -->
             <button id="propose-offer">Propose</button>
             <button id="accept-offer">Accept</button>
           </div>
-          <!-- Container for AI options -->
+          <!-- Containers for dynamic options -->
           <div id="ai-options" class="hidden"></div>
+          <div id="salary-incentives" class="hidden"></div>
         </div>
       </div>
       <button class="back-button" id="back-to-car-selection">Back</button>
@@ -81,7 +101,7 @@
         <img id="car-image" src="" alt="Outcome Image">
         <div id="score-text"></div>
         <div class="button-group">
-          <button class="back-button" id="back-to-car-selection-from-congrats">Try Another Car / AI</button>
+          <button class="back-button" id="back-to-car-selection-from-congrats">Try Another Deal</button>
           <button class="back-button" id="back-to-scenarios-from-congrats">Other Scenarios</button>
         </div>
       </div>
