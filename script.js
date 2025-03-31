@@ -768,7 +768,7 @@ function endSalaryNegotiation() {
   }
   saveHighScores();
   // Set a representative image for salary negotiation (e.g., employer.png)
-  document.getElementById('car-image').src = "employer.png";
+  document.getElementById('negotiation-car-image').src = "employer.png";
   createConfetti();
   switchScreen('congratulations');
 }
