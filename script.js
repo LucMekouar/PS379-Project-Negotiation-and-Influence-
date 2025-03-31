@@ -73,7 +73,6 @@ document.querySelectorAll('.scenario-button').forEach(button => {
       startAINegotiation();
       switchScreen('negotiation');
     } else if (scenario === 'salary-negotiation') {
-      // Show role selection screen for salary negotiation
       switchScreen('salary-role-selection');
     }
   });
@@ -98,7 +97,7 @@ document.getElementById('back-to-car-selection').addEventListener('click', () =>
   resetNegotiation();
 });
 
-// Salary Role Selection: Event Listeners
+// Salary Role Selection Event Listeners
 document.querySelectorAll('.role-button').forEach(button => {
   button.addEventListener('click', function() {
     salaryRole = this.getAttribute('data-role');
@@ -108,7 +107,7 @@ document.querySelectorAll('.role-button').forEach(button => {
 });
 document.getElementById('back-to-scenarios-from-salary-role').addEventListener('click', () => switchScreen('scenario-selection'));
 
-// Negotiation Events for Buy a Car (default)
+// Negotiation Events for Buy a Car (default) or Salary Negotiation
 document.getElementById('propose-offer').addEventListener('click', function() {
   if (currentScenario === 'buy-car') {
     const offerInput = document.getElementById('offer-input');
@@ -186,7 +185,6 @@ function startNegotiation(carType) {
     Initial Price: $${initialPrice.toLocaleString()}
   `;
   document.getElementById('negotiation-car-image').src = `${carType}.png`;
-  // Ensure car negotiation UI is visible
   document.getElementById('offer-input').classList.remove('hidden');
   document.querySelector('.offer-buttons').classList.remove('hidden');
   document.getElementById('ai-options').classList.add('hidden');
@@ -292,7 +290,6 @@ function resetNegotiation() {
   minPrice = 0;
   agreedPrice = null;
   negotiationAttempts = 0;
-  // Reset Salary Negotiation variables
   salaryRole = "";
   initialSalaryOffer = 0;
   employerMax = 0;
@@ -301,7 +298,6 @@ function resetNegotiation() {
   incentiveBonus = 0;
   requestedIncentives = [];
   incentiveRequestsCount = 0;
-  // Reset UI elements
   document.getElementById('offer-input').value = '';
   document.getElementById('ai-options').innerHTML = '';
   document.getElementById('ai-options').classList.add('hidden');
@@ -534,44 +530,44 @@ function beginSalaryNegotiation(role) {
   // Update negotiation screen UI for salary negotiation
   document.getElementById('offer-input').value = "";
   document.getElementById('offer-input').placeholder = "Enter your salary offer (£)";
-  // Change button texts and show extra options dynamically
+  // Change negotiation buttons to use the salary-button style
   const btnGroup = document.querySelector('.offer-buttons');
   btnGroup.innerHTML = "";
   
-  // Create "Negotiate Salary" button
   const negotiateBtn = document.createElement('button');
   negotiateBtn.id = "propose-offer";
   negotiateBtn.textContent = "Negotiate Salary";
+  negotiateBtn.classList.add('salary-button');
   negotiateBtn.addEventListener('click', handleSalaryOffer);
   btnGroup.appendChild(negotiateBtn);
   
-  // Create "Request Incentive" button
   const incentiveBtn = document.createElement('button');
   incentiveBtn.id = "request-incentive";
   incentiveBtn.textContent = "Request Incentive";
+  incentiveBtn.classList.add('salary-button');
   incentiveBtn.addEventListener('click', requestIncentiveSalary);
   btnGroup.appendChild(incentiveBtn);
   
-  // Create "Walk Away" button
   const walkAwayBtn = document.createElement('button');
   walkAwayBtn.id = "walk-away";
   walkAwayBtn.textContent = "Walk Away";
+  walkAwayBtn.classList.add('salary-button');
   walkAwayBtn.addEventListener('click', walkAwaySalary);
   btnGroup.appendChild(walkAwayBtn);
   
-  // Create "Accept Offer" button
   const acceptBtn = document.createElement('button');
   acceptBtn.id = "accept-offer";
   acceptBtn.textContent = "Accept Offer";
+  acceptBtn.classList.add('salary-button');
   acceptBtn.addEventListener('click', acceptSalaryOffer);
   btnGroup.appendChild(acceptBtn);
   
-  // Set employer's initial message
+  // Set employer's introductory message and image
   document.getElementById('seller-dialog').innerHTML = `
     Employer: We propose a salary of £${initialSalaryOffer.toLocaleString()}. What are your thoughts?
   `;
-  // Use an image representing an employer (e.g., employer.png)
-  document.getElementById('negotiation-car-image').src = "employer.png";
+  // Use the negotiation scene image (employee & employer negotiating)
+  document.getElementById('negotiation-car-image').src = "employer-interview_picture.png";
 }
 
 function handleSalaryOffer() {
@@ -581,8 +577,6 @@ function handleSalaryOffer() {
     showInputError(offerInput, 'Please enter a valid salary amount');
     return;
   }
-  // For High-Quality role: thresholds: high wage > £50k; slight increase between £35k and £50k.
-  // For Low-Quality role: thresholds: high wage > £35k; slight increase between £25k and £35k.
   let rejectionChance = 0;
   let accepted = false;
   let counterOffer = 0;
@@ -595,7 +589,7 @@ function handleSalaryOffer() {
       endSalaryNegotiation();
       return;
     }
-    if (offer > 50000) { // High wage range
+    if (offer > 50000) { 
       rejectionChance = (offer - 50000) / (employerMax - 50000);
       if (Math.random() < rejectionChance) {
         document.getElementById('seller-dialog').innerHTML = `
@@ -610,8 +604,7 @@ function handleSalaryOffer() {
           Employer: We counter with £${counterOffer.toLocaleString()}. You may negotiate further.
         `;
       }
-    } else { // Slightly higher wage range: between initial (35k) and 50k
-      // Acceptance chance decreases linearly from 100% at 35k to 0% at 60k.
+    } else {
       rejectionChance = (offer - initialSalaryOffer) / (employerMax - initialSalaryOffer);
       if (Math.random() < rejectionChance) {
         counterOffer = Math.floor(Math.random() * (offer - initialSalaryOffer) + initialSalaryOffer);
@@ -631,7 +624,7 @@ function handleSalaryOffer() {
       endSalaryNegotiation();
       return;
     }
-    if (offer > 35000) { // High wage range for low-quality
+    if (offer > 35000) {
       rejectionChance = (offer - 35000) / (employerMax - 35000);
       if (Math.random() < rejectionChance) {
         document.getElementById('seller-dialog').innerHTML = `
@@ -646,7 +639,7 @@ function handleSalaryOffer() {
           Employer: We counter with £${counterOffer.toLocaleString()}. You may negotiate further.
         `;
       }
-    } else { // Slightly higher wage range: between initial (25k) and 35k
+    } else {
       rejectionChance = (offer - initialSalaryOffer) / (employerMax - initialSalaryOffer);
       if (Math.random() < rejectionChance) {
         counterOffer = Math.floor(Math.random() * (offer - initialSalaryOffer) + initialSalaryOffer);
@@ -658,14 +651,12 @@ function handleSalaryOffer() {
       }
     }
   }
-  // If accepted, set final salary and update input placeholder
   if (accepted) {
     finalSalaryOffer = offer;
     document.getElementById('seller-dialog').innerHTML = `
       Employer: Your offer of £${offer.toLocaleString()} is accepted.
     `;
   } else if (counterOffer) {
-    // Let the player see the counteroffer by setting it in the input field for renegotiation
     offerInput.value = counterOffer;
   }
 }
@@ -675,7 +666,6 @@ function requestIncentiveSalary() {
     showTemporaryMessage("You have reached the maximum number of incentive requests.");
     return;
   }
-  // Display available incentives (those not already requested)
   const available = incentivesData.filter(incentive => !requestedIncentives.includes(incentive.name));
   if (available.length === 0) {
     showTemporaryMessage("No more incentives available.");
@@ -687,29 +677,57 @@ function requestIncentiveSalary() {
   available.forEach(incentive => {
     const btn = document.createElement('button');
     btn.textContent = incentive.name;
+    btn.classList.add('salary-button');
     btn.addEventListener('click', () => {
-      // For incentives with percentage values, compute based on finalSalaryOffer if set, else current offer from input.
       let currentOffer = finalSalaryOffer || parseFloat(document.getElementById('offer-input').value) || initialSalaryOffer;
       let cost = incentive.cost;
-      let value = incentive.value;
+      let fullValue = incentive.value;
       if (incentive.costPercent) {
         cost = Math.floor((incentive.costPercent / 100) * currentOffer);
       }
       if (incentive.valuePercent) {
-        value = Math.floor((incentive.valuePercent / 100) * currentOffer);
+        fullValue = Math.floor((incentive.valuePercent / 100) * currentOffer);
       }
-      if (employerRemaining >= cost) {
-        requestedIncentives.push(incentive.name);
-        incentiveBonus += value;
+      let randomOutcome = Math.random();
+      if (randomOutcome < 0.4 && employerRemaining >= cost) {
+        requestedIncentives.push(incentive.name + " (Full)");
+        incentiveBonus += fullValue;
         employerRemaining -= cost;
         document.getElementById('seller-dialog').innerHTML = `
-          Employer: ${incentive.name} approved.
+          Employer: ${incentive.name} fully approved.
+        `;
+        incentiveRequestsCount++;
+      } else if (randomOutcome < 0.7 && employerRemaining >= Math.floor(cost / 2)) {
+        requestedIncentives.push(incentive.name + " (Partial)");
+        incentiveBonus += Math.floor(fullValue * 0.5);
+        employerRemaining -= Math.floor(cost / 2);
+        document.getElementById('seller-dialog').innerHTML = `
+          Employer: ${incentive.name} partially approved.
         `;
         incentiveRequestsCount++;
       } else {
-        document.getElementById('seller-dialog').innerHTML = `
-          Employer: We cannot accommodate the ${incentive.name} request.
-        `;
+        let alternative = available.find(inv => inv.name !== incentive.name);
+        if (alternative && employerRemaining >= (alternative.cost || 0)) {
+          requestedIncentives.push(alternative.name + " (Alternative Offer)");
+          let altValue = alternative.value;
+          let altCost = alternative.cost;
+          if (alternative.valuePercent) {
+            altValue = Math.floor((alternative.valuePercent / 100) * currentOffer);
+          }
+          if (alternative.costPercent) {
+            altCost = Math.floor((alternative.costPercent / 100) * currentOffer);
+          }
+          incentiveBonus += Math.floor(altValue * 0.75);
+          employerRemaining -= altCost;
+          document.getElementById('seller-dialog').innerHTML = `
+            Employer: ${incentive.name} not approved, but we can offer ${alternative.name} at 75% value.
+          `;
+          incentiveRequestsCount++;
+        } else {
+          document.getElementById('seller-dialog').innerHTML = `
+            Employer: We cannot accommodate the ${incentive.name} request.
+          `;
+        }
       }
       incentivesDiv.innerHTML = "";
       incentivesDiv.classList.add('hidden');
@@ -719,7 +737,6 @@ function requestIncentiveSalary() {
 }
 
 function walkAwaySalary() {
-  // 50% chance: employer returns with a new offer; 50%: no deal.
   if (Math.random() < 0.5) {
     const newOffer = Math.floor(Math.random() * (employerMax - initialSalaryOffer) + initialSalaryOffer);
     document.getElementById('seller-dialog').innerHTML = `
@@ -736,8 +753,6 @@ function walkAwaySalary() {
 }
 
 function acceptSalaryOffer() {
-  // If the offer has been accepted via negotiation or player decides to finalize
-  // Use the value from the input if finalSalaryOffer is not set
   if (!finalSalaryOffer) {
     finalSalaryOffer = parseFloat(document.getElementById('offer-input').value) || initialSalaryOffer;
   }
@@ -745,10 +760,8 @@ function acceptSalaryOffer() {
 }
 
 function endSalaryNegotiation() {
-  // Calculate Base Score and Bonus
   let baseScore = Math.floor((finalSalaryOffer / initialSalaryOffer) * 100);
   let totalScore = baseScore + incentiveBonus;
-  // Update high score if applicable
   if (totalScore > highScores["Salary Negotiation"]) {
     highScores["Salary Negotiation"] = totalScore;
     document.getElementById('score-text').innerHTML = `
@@ -767,8 +780,7 @@ function endSalaryNegotiation() {
     `;
   }
   saveHighScores();
-  // Set a representative image for salary negotiation (e.g., employer.png)
-  document.getElementById('negotiation-car-image').src = "employer.png";
+  document.getElementById('car-image').src = "seller.jpg";
   createConfetti();
   switchScreen('congratulations');
 }

@@ -66,6 +66,15 @@ button:hover {
   box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
 }
 
+/* New style for salary negotiation buttons */
+.salary-button {
+  background: #4ecdc4;
+  color: white;
+}
+.salary-button:hover {
+  background: #3cbdb6;
+}
+
 .hidden {
   display: none !important;
 }
@@ -203,7 +212,7 @@ button:hover {
   flex-wrap: wrap;
 }
 
-/* Additional container for incentive options (for salary negotiation) */
+/* Additional containers for dynamic options */
 #ai-options,
 #salary-incentives {
   margin-top: 1rem;

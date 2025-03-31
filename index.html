@@ -55,12 +55,8 @@
         You will negotiate with a virtual employer to maximize your salary and benefits.<br>
         Choose your role:
       </p>
-      <button class="role-button" data-role="high">
-        High-Quality Employee<br>(Initial Offer: £35,000; Employer Max: £60,000)
-      </button>
-      <button class="role-button" data-role="low">
-        Low-Quality Employee<br>(Initial Offer: £25,000; Employer Max: £40,000)
-      </button>
+      <button class="role-button" data-role="high">better than average employee</button>
+      <button class="role-button" data-role="low">average employee</button>
       <button class="back-button" id="back-to-scenarios-from-salary-role">Back to Scenarios</button>
     </div>
 
@@ -78,15 +74,14 @@
             <p class="attempts-counter" id="attempts-counter"></p>
           </div>
         </div>
-        <!-- For Car: salary input; For AI or Salary: options will be dynamically injected -->
+        <!-- Input and dynamic option containers -->
         <div id="player-bubble">
           <input type="text" id="offer-input" placeholder="Enter your offer">
           <div class="offer-buttons">
-            <!-- These buttons will be re-purposed based on the scenario -->
+            <!-- Buttons will be re-purposed per scenario -->
             <button id="propose-offer">Propose</button>
             <button id="accept-offer">Accept</button>
           </div>
-          <!-- Containers for dynamic options -->
           <div id="ai-options" class="hidden"></div>
           <div id="salary-incentives" class="hidden"></div>
         </div>
