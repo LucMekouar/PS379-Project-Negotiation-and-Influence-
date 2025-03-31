@@ -68,11 +68,11 @@ button:hover {
 
 /* New style for salary negotiation buttons */
 .salary-button {
-  background:rgba(255, 255, 255, 0.1);
+  background:#2A2A2A;
   color: white;
 }
 .salary-button:hover {
-  background: #3cbdb6;
+  background: #FF5252;
 }
 
 .hidden {
