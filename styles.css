@@ -343,3 +343,28 @@ button:hover {
   background: var(--button-hover);
   transform: translateY(-2px);
 }
+
+#salary-offer-box {
+  background-color: #444; /* dark gray background */
+  padding: 0.8rem;
+  border-radius: var(--border-radius);
+  margin-top: 1rem;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#salary-offer-box input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 50px;
+  background: transparent;
+  color: white;
+  font-size: 1.1rem;
+}
+
+#salary-offer-box input:focus {
+  outline: none;
+  border-color: var(--button-hover);
+}
