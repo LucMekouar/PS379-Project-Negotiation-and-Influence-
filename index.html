@@ -1,3 +1,4 @@
+<!-- index.html — UPDATED -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,20 +77,26 @@
         </div>
         <!-- Input and dynamic option containers -->
         <div id="player-bubble">
-          <input type="text" id="offer-input" placeholder="Enter your offer">
+          <input type="text" id="offer-input" placeholder="Enter your salary offer (£)">
           <div class="offer-buttons">
             <!-- Buttons will be re-purposed per scenario -->
-            <button id="propose-offer">Propose</button>
-            <button id="accept-offer">Accept</button>
           </div>
-          <div id="salary-offer-box" class="hidden">
-            <input type="text" id="salary-offer-input" placeholder="Enter your salary offer (£)">
-          </div>
+          <!-- New offer history box -->
+          <div id="offer-history" class="hidden"></div>
+          <!-- Incentives & AI options -->
           <div id="ai-options" class="hidden"></div>
           <div id="salary-incentives" class="hidden"></div>
         </div>
       </div>
       <button class="back-button" id="back-to-car-selection">Back</button>
+    </div>
+
+    <!-- Bonus Question Panel -->
+    <div id="bonus-panel" class="hidden">
+      <h3>Bonus Question</h3>
+      <p id="bonus-question-text"></p>
+      <div id="bonus-options"></div>
+      <button id="bonus-submit" class="salary-button">Submit</button>
     </div>
 
     <!-- Congratulations Screen -->
