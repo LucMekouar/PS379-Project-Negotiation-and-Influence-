@@ -1,125 +1,42 @@
-<!-- index.html — UPDATED -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Negotiation Master</title>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="game-container">
-    <h1>Negotiation Master</h1>
-    
-    <!-- Initial Screen -->
-    <div id="initial-screen">
-      <button id="start-button">START GAME</button>
-    </div>
 
-    <!-- Scenario Selection -->
-    <div id="scenario-selection" class="hidden">
-      <h2>Choose Your Negotiation Scenario:</h2>
-      <button class="scenario-button" data-scenario="buy-car">Buy a Car</button>
-      <button class="scenario-button" data-scenario="rogue-ai">Rogue AI Negotiation</button>
-      <button class="scenario-button" data-scenario="salary-negotiation">Salary Negotiation</button>
-      <button id="high-scores-button">High Scores</button>
-      <button class="back-button" id="back-to-initial-from-scenarios">Main Menu</button>
-    </div>
+<!-- Scenario Selection -->
+<div id="scenarioSelection">
+  <h1>Negotiation Master</h1>
+  <p>Select a scenario to begin:</p>
+  <button onclick="startScenario('salary')">Salary Negotiation</button>
+  <button onclick="startScenario('car')">Car Price Negotiation</button>
+</div>
 
-    <!-- Car Selection -->
-    <div id="car-selection" class="hidden">
-      <h2>Select Your Dream Car:</h2>
-      <div class="car-options-grid">
-        <div class="car-option" data-car="new_car">
-          <img src="new_car.png" alt="New Car">
-          <p>New Car</p>
-        </div>
-        <div class="car-option" data-car="old_car">
-          <img src="old_car.png" alt="Old Car">
-          <p>Old Car</p>
-        </div>
-        <div class="car-option" data-car="antique">
-          <img src="antique.png" alt="Antique Car">
-          <p>Antique Car</p>
-        </div>
-      </div>
-      <button class="back-button" id="back-to-scenarios">Back to Scenarios</button>
-    </div>
-
-    <!-- Salary Role Selection -->
-    <div id="salary-role-selection" class="hidden">
-      <h2>Salary Negotiation - Choose Your Role</h2>
-      <p>
-        Welcome to the Salary Negotiation Game!<br>
-        You will negotiate with a virtual employer to maximize your salary and benefits.<br>
-        Choose your role:
-      </p>
-      <button class="role-button" data-role="high">better than average employee</button>
-      <button class="role-button" data-role="low">average employee</button>
-      <button class="back-button" id="back-to-scenarios-from-salary-role">Back to Scenarios</button>
-    </div>
-
-    <!-- Negotiation Screen -->
-    <div id="negotiation" class="hidden">
-      <div class="negotiation-container">
-        <!-- Negotiation image (for car, AI, or salary) -->
-        <img id="negotiation-car-image" src="" alt="Negotiation Image" class="negotiation-car-img">
-        <div id="seller-bubble">
-          <div class="seller-avatar">
-            <img src="seller.jpg" alt="Negotiator">
-          </div>
-          <div class="dialog-content">
-            <p id="seller-dialog"></p>
-            <p class="attempts-counter" id="attempts-counter"></p>
-          </div>
-        </div>
-        <!-- Input and dynamic option containers -->
-        <div id="player-bubble">
-          <input type="text" id="offer-input" placeholder="Enter your salary offer (£)">
-          <div class="offer-buttons">
-            <!-- Buttons will be re-purposed per scenario -->
-          </div>
-          <!-- New offer history box -->
-          <div id="offer-history" class="hidden"></div>
-          <!-- Incentives & AI options -->
-          <div id="ai-options" class="hidden"></div>
-          <div id="salary-incentives" class="hidden"></div>
-        </div>
-      </div>
-      <button class="back-button" id="back-to-car-selection">Back</button>
-    </div>
-
-    <!-- Bonus Question Panel -->
-    <div id="bonus-panel" class="hidden">
-      <h3>Bonus Question</h3>
-      <p id="bonus-question-text"></p>
-      <div id="bonus-options"></div>
-      <button id="bonus-submit" class="salary-button">Submit</button>
-    </div>
-
-    <!-- Congratulations Screen -->
-    <div id="congratulations" class="hidden">
-      <div class="congrats-content">
-        <h2>Negotiation Outcome</h2>
-        <img id="car-image" src="" alt="Outcome Image">
-        <div id="score-text"></div>
-        <div class="button-group">
-          <button class="back-button" id="back-to-car-selection-from-congrats">Try Another Deal</button>
-          <button class="back-button" id="back-to-scenarios-from-congrats">Other Scenarios</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- High Scores -->
-    <div id="high-scores" class="hidden">
-      <h2>High Scores</h2>
-      <pre id="high-scores-text"></pre>
-      <button id="reset-high-scores-button">Reset High Scores</button>
-      <button class="back-button" id="back-to-scenarios-from-high-scores">Back to Scenarios</button>
-    </div>
+<!-- Negotiation Interface -->
+<div id="negotiationInterface" style="display:none;">
+  <h2 id="scenarioTitle"></h2>
+  <div id="dialogue"></div>
+  <div id="userActions">
+    <input type="number" id="offerInput" placeholder="" />
+    <button id="negotiateButton"></button>
+    <button id="acceptButton">Accept Deal</button>
   </div>
-  <script src="script.js"></script>
+</div>
+
+<!-- Bonus Question Overlay -->
+<div id="bonusOverlay" class="bonus-overlay" style="display:none;">
+  <div class="bonus-content">
+    <h3>Bonus Question</h3>
+    <p id="bonusQuestionText"></p>
+    <div id="bonusOptions"></div>
+    <p id="bonusFeedback"></p>
+    <button id="closeBonusBtn" style="display:none;">Continue</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
