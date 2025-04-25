@@ -1,422 +1,411 @@
-// Negotiation Master game script
-
-// Global state
+// ---- Global State ----
 let currentScenario = null;
-let scenarioData = null;
-let partnerOffer = null;
+let selectedCar = null;
+let selectedRole = null;
+let partnerOffer = 0;
 let partnerFinalOfferMade = false;
-let partnerFinalValue = null;
-let userOfferCount = 0;
-let score = 0;  // total score, primarily for bonus points
+let partnerFinalValue = 0;
+let incentiveBonus = 0;
+let employerRemaining = 0;
+let requestedIncentives = [];
+let incentiveRequestsCount = 0;
 
-// Scenario definitions with expanded bonus question banks
+// Load or initialize high scores
+let highScores = JSON.parse(localStorage.getItem('highScores')) || {
+  salary: 0,
+  car: { new_car: 0, old_car: 0, antique: 0 }
+};
+
+// Car specifications
+const carSpecs = {
+  new_car:    { label: 'New Car',     image: 'new_car.png',    initial: 50000, min: 35000 },
+  old_car:    { label: 'Old Car',     image: 'old_car.png',    initial: 10000, min: 8000  },
+  antique:    { label: 'Antique Car', image: 'antique.png',     initial: 13000, min: 10000 }
+};
+
+// Scenario definitions
 const scenarios = {
   salary: {
-    name: "Salary Negotiation",
-    partnerName: "Employer",
-    initialOffer: 30000,
-    maxOffer: 35000,
+    name: 'Salary Negotiation',
+    image: 'employer-interview_picture.png',
     questions: [
-      {
-        question: "What does the term '3D negotiation' refer to?",
-        options: [
+      { question: "What does the term '3D negotiation' refer to?", options: [
           "Using three separate negotiation tactics one after the other.",
-          "A negotiation involving three or more parties at the table.",
-          "Negotiating beyond the table by also shaping the setup and deal design (negotiating away from the table).",
-          "A negotiation method that focuses on three critical factors only."
-        ],
-        correct: 2
-      },
-      {
-        question: "In negotiation, what does the concept of System 1 vs System 2 thinking describe?",
-        options: [
-          "Using two negotiation approaches: one competitive (System 1) and one cooperative (System 2).",
-          "The difference between intuitive, automatic thinking (System 1) and deliberate, analytical thinking (System 2).",
-          "Having a backup negotiator (System 2) to take over if the primary (System 1) fails.",
-          "A strategy where one party makes the first offer (System 1) and the other party responds (System 2)."
-        ],
-        correct: 1
-      },
-      {
-        question: "Which of the following best describes 'leverage' in a negotiation?",
-        options: [
-          "Strictly sticking to your initial position throughout the negotiation.",
-          "Using persuasive techniques and emotional appeals.",
-          "The power or advantage one side has to influence the outcome in their favor.",
-          "Offering incentives or concessions to get the other side to agree."
-        ],
-        correct: 2
-      },
-      {
-        question: "What is a key characteristic of interest-based (principled) bargaining?",
-        options: [
-          "Insisting on your demands until the other side concedes.",
-          "Focusing on underlying interests and seeking win-win solutions.",
-          "Making compromises without discussing the reasons behind positions.",
-          "Keeping your real goals hidden from the other party."
-        ],
-        correct: 1
-      },
-      {
-        question: "What is 'anchoring' in the context of negotiation?",
-        options: [
-          "Refusing to move away from an initial offer once it's made.",
-          "The first offer or piece of information sets a reference point that skews the rest of the negotiation.",
-          "Staying focused on one issue to avoid confusion in talks.",
-          "Establishing a friendly rapport before getting to numbers."
-        ],
-        correct: 1
-      }
-    ]
+          "Negotiating beyond the table by shaping deal design and setup.",
+          "A negotiation involving three or more parties.",
+          "A method focusing on three critical factors only."
+        ], correct: 1 },
+      { question: "System 1 vs System 2 thinking describes:", options: [
+          "Competitive vs cooperative tactics.",
+          "Intuitive (fast) vs analytical (slow) thinking.",
+          "Having a backup negotiator.",
+          "Making first vs second offers."
+        ], correct: 1 },
+      { question: "Leverage in negotiation is best defined as:", options: [
+          "Strictly sticking to your initial position.",
+          "Persuasive emotional appeals.",
+          "The power one side has to influence outcome.",
+          "Offering concessions only."
+        ], correct: 2 },
+      { question: "Anchoring bias means:", options: [
+          "Refusing to move from the initial offer.",
+          "The first offer sets a reference point.",
+          "Focusing on one issue only.",
+          "Building rapport first."
+        ], correct: 1 },
+      { question: "Interest-based bargaining focuses on:", options: [
+          "Insisting demands.",
+          "Underlying interests for win-win outcomes.",
+          "Compromises without discussion.",
+          "Hiding true goals."
+        ], correct: 1 }
+    ],
+    roles: {
+      high: { initial: 35000, max: 60000 },
+      low:  { initial: 25000, max: 40000 }
+    },
+    incentivesData: [
+      { name: 'Signing Bonus', value: 2000, cost: 3000 },
+      { name: 'Flexible Hours', valuePercent: 10, costPercent: 7.5 },
+      { name: 'Professional Development', value: 500, cost: 1000 },
+      { name: 'Gym Membership', value: 150, cost: 100 },
+      { name: 'Stock Options', value: 3000, cost: 5000 }
+    ],
+    maxIncentives: 4
   },
   car: {
-    name: "Car Price Negotiation",
-    partnerName: "Seller",
-    initialOffer: 10000,
-    minPrice: 8000,
+    name: 'Car Price Negotiation',
     questions: [
-      {
-        question: "What does the term '3D negotiation' refer to?",
-        options: [
-          "Using three separate negotiation tactics one after the other.",
-          "A negotiation involving three or more parties at the table.",
-          "Negotiating beyond the table by also shaping the setup and deal design (negotiating away from the table).",
-          "A negotiation method that focuses on three critical factors only."
-        ],
-        correct: 2
-      },
-      {
-        question: "In negotiation, what does the concept of System 1 vs System 2 thinking describe?",
-        options: [
-          "Using two negotiation approaches: one competitive (System 1) and one cooperative (System 2).",
-          "The difference between intuitive, automatic thinking (System 1) and deliberate, analytical thinking (System 2).",
-          "Having a backup negotiator (System 2) to take over if the primary (System 1) fails.",
-          "A strategy where one party makes the first offer (System 1) and the other party responds (System 2)."
-        ],
-        correct: 1
-      },
-      {
-        question: "Which of the following best describes 'leverage' in a negotiation?",
-        options: [
-          "Strictly sticking to your initial position throughout the negotiation.",
-          "Using persuasive techniques and emotional appeals.",
-          "The power or advantage one side has to influence the outcome in their favor.",
-          "Offering incentives or concessions to get the other side to agree."
-        ],
-        correct: 2
-      },
-      {
-        question: "What is a key characteristic of interest-based (principled) bargaining?",
-        options: [
-          "Insisting on your demands until the other side concedes.",
-          "Focusing on underlying interests and seeking win-win solutions.",
-          "Making compromises without discussing the reasons behind positions.",
-          "Keeping your real goals hidden from the other party."
-        ],
-        correct: 1
-      },
-      {
-        question: "What is 'anchoring' in the context of negotiation?",
-        options: [
-          "Refusing to move away from an initial offer once it's made.",
-          "The first offer or piece of information sets a reference point that skews the rest of the negotiation.",
-          "Staying focused on one issue to avoid confusion in talks.",
-          "Establishing a friendly rapport before getting to numbers."
-        ],
-        correct: 1
-      }
+      { question: "What is 3D negotiation?", options: [
+          "Three tactics sequentially.",
+          "Shaping deal design away from the table.",
+          "Three or more parties.",
+          "Three-factor method."
+        ], correct: 1 },
+      { question: "System 1 vs System 2:", options: [
+          "Competitive vs cooperative.",
+          "Intuitive vs analytical.",
+          "Backup negotiator.",
+          "Offer order."
+        ], correct: 1 },
+      { question: "Leverage is:", options: [
+          "Sticking to demands.",
+          "Emotional appeals.",
+          "Influence power.",
+          "Only concessions."
+        ], correct: 2 },
+      { question: "Anchoring bias:", options: [
+          "Refuse to budge.",
+          "First offer as reference.",
+          "Single-issue focus.",
+          "Build rapport."
+        ], correct: 1 },
+      { question: "Interest-based bargaining:", options: [
+          "Insist demands.",
+          "Win-win via interests.",
+          "Compromise only.",
+          "Hide goals."
+        ], correct: 1 }
     ]
   }
 };
 
-// Get DOM elements
+// DOM Elements
 const scenarioSelectionDiv = document.getElementById('scenarioSelection');
-const negotiationInterfaceDiv = document.getElementById('negotiationInterface');
-const scenarioTitle = document.getElementById('scenarioTitle');
-const dialogueDiv = document.getElementById('dialogue');
-const offerInput = document.getElementById('offerInput');
-const negotiateButton = document.getElementById('negotiateButton');
-const acceptButton = document.getElementById('acceptButton');
-const bonusOverlay = document.getElementById('bonusOverlay');
-const bonusQuestionText = document.getElementById('bonusQuestionText');
-const bonusOptionsDiv = document.getElementById('bonusOptions');
-const bonusFeedback = document.getElementById('bonusFeedback');
-const closeBonusBtn = document.getElementById('closeBonusBtn');
+const carSelectionDiv      = document.getElementById('carSelection');
+const roleSelectionDiv     = document.getElementById('roleSelection');
+const negotiationDiv       = document.getElementById('negotiationInterface');
+const dialogueDiv          = document.getElementById('dialogue');
+const titleEl              = document.getElementById('scenarioTitle');
+const imgEl                = document.getElementById('negotiationImage');
+const offerInput           = document.getElementById('offerInput');
+const negotiateBtn         = document.getElementById('negotiateButton');
+const requestCompBtn       = document.getElementById('requestCompBtn');
+const acceptBtn            = document.getElementById('acceptButton');
+const compOptionsDiv       = document.getElementById('compensationOptions');
+const bonusOverlay         = document.getElementById('bonusOverlay');
+const bonusQuestionText    = document.getElementById('bonusQuestionText');
+const bonusOptionsDiv      = document.getElementById('bonusOptions');
+const bonusFeedback        = document.getElementById('bonusFeedback');
+const closeBonusBtn        = document.getElementById('closeBonusBtn');
+const highScoreScreenDiv   = document.getElementById('highScoreScreen');
+const highScoreListDiv     = document.getElementById('highScoreList');
 
-// Start the selected scenario
-function startScenario(scenarioKey) {
-  currentScenario = scenarioKey;
-  scenarioData = scenarios[scenarioKey];
-  userOfferCount = 0;
-  partnerFinalOfferMade = false;
-  partnerFinalValue = null;
-  // Show negotiation interface for the chosen scenario
-  scenarioTitle.textContent = scenarioData.name;
-  scenarioSelectionDiv.style.display = 'none';
-  negotiationInterfaceDiv.style.display = 'block';
-  // Configure input field and buttons based on scenario
-  if (scenarioKey === 'salary') {
-    // Salary scenario: hide input until 'Negotiate Salary' is clicked
-    offerInput.value = '';
-    offerInput.placeholder = 'Propose your salary in £';
-    offerInput.style.display = 'none';
-    negotiateButton.textContent = 'Negotiate Salary';
-  } else if (scenarioKey === 'car') {
-    // Car scenario: input visible from start
-    offerInput.value = '';
-    offerInput.placeholder = 'Enter your car offer in £';
+// Buttons
+document.getElementById('salaryScenarioBtn').onclick = showRoleSelection;
+document.getElementById('carScenarioBtn').onclick    = showCarSelection;
+document.getElementById('viewHighScoresBtn').onclick = showHighScores;
+document.getElementById('backFromCarSelect').onclick = () => swapScreen(carSelectionDiv, scenarioSelectionDiv);
+document.getElementById('backFromRoleSelect').onclick= () => swapScreen(roleSelectionDiv, scenarioSelectionDiv);
+document.getElementById('backFromHighScoresBtn').onclick = () => swapScreen(highScoreScreenDiv, scenarioSelectionDiv);
+
+// Car options
+Array.from(document.querySelectorAll('.car-option')).forEach(el => {
+  el.onclick = () => { selectedCar = el.dataset.car; startCarNegotiation(); };
+});
+// Role options
+Array.from(document.querySelectorAll('.role-btn')).forEach(el => {
+  el.onclick = () => { selectedRole = el.dataset.role; startSalaryNegotiation(); };
+});
+
+// Negotiation actions
+negotiateBtn.onclick = () => {
+  if (currentScenario === 'salary' && offerInput.style.display === 'none') {
+    // reveal input the first time
     offerInput.style.display = 'inline-block';
-    negotiateButton.textContent = 'Submit Offer';
+    offerInput.placeholder = 'Propose your salary in £';
+    negotiateBtn.textContent = 'Submit Offer';
+    return;
   }
-  // Ensure Accept button is visible and enabled from the start
-  acceptButton.style.display = 'inline-block';
-  acceptButton.disabled = false;
-  // Clear dialogue and show partner's initial offer
-  dialogueDiv.innerHTML = '';
-  partnerOffer = scenarioData.initialOffer;
-  if (scenarioKey === 'salary') {
-    displayMessage(scenarioData.partnerName + ": I can offer you £" + partnerOffer + " as a starting salary.");
-  } else if (scenarioKey === 'car') {
-    displayMessage(scenarioData.partnerName + ": I'm asking £" + partnerOffer + " for the car.");
-  }
+  processUserOffer();
+};
+requestCompBtn.onclick = () => requestCompensation();
+acceptBtn.onclick = () => {
+  displayMessage(`You accept £${partnerOffer}`);
+  endNegotiation(true, partnerOffer);
+};
+
+closeBonusBtn.onclick = () => {
+  bonusOverlay.classList.add('hidden');
+  negotiationDiv.classList.add('hidden');
+  swapScreen(negotiationDiv, scenarioSelectionDiv);
+};
+
+// Show/Hide helper
+function swapScreen(hideEl, showEl) {
+  hideEl.classList.add('hidden');
+  showEl.classList.remove('hidden');
 }
 
-// Utility: display a message in the dialogue area
+// Display a dialogue message
 function displayMessage(text) {
   const p = document.createElement('p');
   p.textContent = text;
   dialogueDiv.appendChild(p);
-  // Auto-scroll to bottom for new messages
   dialogueDiv.scrollTop = dialogueDiv.scrollHeight;
 }
 
-// Process the user's offer when they submit a proposal
+// Start Car Negotiation
+function startCarNegotiation() {
+  currentScenario = 'car';
+  scenarioSelectionDiv.classList.add('hidden');
+  carSelectionDiv.classList.add('hidden');
+  negotiationDiv.classList.remove('hidden');
+
+  const spec = carSpecs[selectedCar];
+  partnerOffer = spec.initial;
+  partnerFinalOfferMade = false;
+  incentiveBonus = 0;
+  dialogueDiv.innerHTML = '';
+  titleEl.textContent = scenarios.car.name;
+  imgEl.src = spec.image;
+  offerInput.style.display = 'inline-block';
+  offerInput.value = '';
+  offerInput.placeholder = 'Enter your car offer in £';
+  negotiateBtn.textContent = 'Submit Offer';
+  requestCompBtn.style.display = 'none';
+  compOptionsDiv.classList.add('hidden');
+
+  displayMessage(`${scenarios.car.name} - Asking price: £${partnerOffer}`);
+}
+
+// Start Salary Negotiation
+function startSalaryNegotiation() {
+  currentScenario = 'salary';
+  scenarioSelectionDiv.classList.add('hidden');
+  roleSelectionDiv.classList.add('hidden');
+  negotiationDiv.classList.remove('hidden');
+
+  const roleData = scenarios.salary.roles[selectedRole];
+  partnerOffer = roleData.initial;
+  employerRemaining = roleData.max - roleData.initial;
+  partnerFinalOfferMade = false;
+  incentiveBonus = 0;
+  requestedIncentives = [];
+  incentiveRequestsCount = 0;
+  dialogueDiv.innerHTML = '';
+  titleEl.textContent = scenarios.salary.name;
+  imgEl.src = scenarios.salary.image;
+
+  offerInput.style.display = 'none';
+  negotiateBtn.textContent = 'Negotiate Salary';
+  requestCompBtn.style.display = 'inline-block';
+  compOptionsDiv.classList.add('hidden');
+
+  displayMessage(`${scenarios.salary.name} - Employer offers £${partnerOffer}`);
+}
+
+// Process user offer input
 function processUserOffer() {
-  const offerValue = parseInt(offerInput.value);
-  if (isNaN(offerValue) || offerValue <= 0) {
-    alert('Please enter a valid number for your offer.');
-    return;
-  }
-  const userOffer = offerValue;
-  displayMessage("You: I propose £" + userOffer + ".");
-  userOfferCount++;
-  // Partner responds based on scenario logic
-  if (currentScenario === 'salary') {
-    handleSalaryCounter(userOffer);
-  } else if (currentScenario === 'car') {
-    handleCarCounter(userOffer);
-  }
-  // Clear the input field for the next round
+  const val = parseInt(offerInput.value);
+  if (isNaN(val) || val <= 0) { alert('Enter a valid number'); return; }
+  displayMessage(`You propose £${val}`);
+  if (currentScenario === 'car') handleCarCounter(val);
+  else if (currentScenario === 'salary') handleSalaryCounter(val);
   offerInput.value = '';
 }
 
-// Handle the partner's counter-offer logic for the salary scenario
-function handleSalaryCounter(userOffer) {
-  const maxOffer = scenarioData.maxOffer;
-  if (userOffer > maxOffer) {
-    // User asks for more than employer's maximum
-    partnerOffer = maxOffer;
-    partnerFinalOfferMade = true;
-    partnerFinalValue = maxOffer;
-    displayMessage(scenarioData.partnerName + ": I'm sorry, we cannot go to £" + userOffer + ". The highest we can offer is £" + partnerOffer + ".");
-    // User can now only accept or counter (if counter above this again, it will be no deal)
-    return;
-  }
-  // User's offer is within the employer's limit
-  if (!partnerFinalOfferMade) {
-    // If user offered less or equal to current offer (unexpected in salary negotiation), employer accepts (cheaper for them)
-    if (userOffer <= partnerOffer) {
-      displayMessage(scenarioData.partnerName + ": Alright, we accept £" + userOffer + ".");
-      partnerOffer = userOffer;
-      endNegotiation(true, partnerOffer);
-      return;
-    }
-    // User offered more than current offer but <= maxOffer
-    const difference = userOffer - partnerOffer;
-    if (difference <= partnerOffer * 0.05) {
-      // If the counter is only slightly higher, employer accepts the proposal
-      displayMessage(scenarioData.partnerName + ": We can agree to £" + userOffer + ". You've got a deal.");
-      partnerOffer = userOffer;
-      endNegotiation(true, partnerOffer);
-    } else {
-      // Otherwise, employer counters with a higher offer (halfway toward user's offer, capped at maxOffer)
-      let counterOffer = partnerOffer + Math.round(difference / 2);
-      if (counterOffer > maxOffer) {
-        counterOffer = maxOffer;
-      }
-      partnerOffer = counterOffer;
-      if (partnerOffer >= userOffer) {
-        // This counter meets or exceeds user's ask (user's ask was very close to maxOffer)
-        partnerOffer = userOffer;
-        displayMessage(scenarioData.partnerName + ": We can agree to £" + partnerOffer + ".");
-        endNegotiation(true, partnerOffer);
-      } else {
-        if (partnerOffer === maxOffer) {
-          // Reached max offer, mark as final offer
-          partnerFinalOfferMade = true;
-          partnerFinalValue = partnerOffer;
-          displayMessage(scenarioData.partnerName + ": The highest we can go is £" + partnerOffer + ".");
-        } else {
-          // Regular counter-offer (not final yet)
-          displayMessage(scenarioData.partnerName + ": How about £" + partnerOffer + "?");
-        }
-        // Continue negotiation (user can accept or counter again)
-      }
-    }
-  } else {
-    // Employer had already made a final offer, and user countered again
-    if (userOffer <= partnerFinalValue) {
-      // User came down to or below employer's final offer, employer accepts this offer
-      partnerOffer = userOffer;
-      displayMessage(scenarioData.partnerName + ": Alright, we can do £" + userOffer + ". Deal.");
-      endNegotiation(true, partnerOffer);
-    } else {
-      // User still above final limit -> no deal
-      displayMessage(scenarioData.partnerName + ": I’m sorry, £" + partnerFinalValue + " was our final offer. We cannot reach a deal.");
-      endNegotiation(false, null);
-    }
-  }
-}
-
-// Handle the partner's counter-offer logic for the car scenario
+// Car counter logic
 function handleCarCounter(userOffer) {
-  const minPrice = scenarioData.minPrice;
-  if (userOffer < minPrice) {
-    // User offers below seller's minimum price
-    partnerOffer = minPrice;
-    partnerFinalOfferMade = true;
-    partnerFinalValue = minPrice;
-    displayMessage(scenarioData.partnerName + ": I can't go that low. The lowest I'll accept is £" + partnerOffer + ".");
-    return;
-  }
+  const spec = carSpecs[selectedCar];
+  const min = spec.min;
   if (!partnerFinalOfferMade) {
     if (userOffer >= partnerOffer) {
-      // User agrees to current price (or offers more)
-      displayMessage(scenarioData.partnerName + ": Deal! I'll sell it for £" + userOffer + ".");
-      partnerOffer = userOffer;
-      endNegotiation(true, partnerOffer);
+      displayMessage(`Seller: Deal at £${userOffer}!`);
+      endNegotiation(true, userOffer);
+      return;
+    }
+    const diff = partnerOffer - userOffer;
+    if (diff <= partnerOffer * 0.05) {
+      displayMessage(`Seller: Fine, £${userOffer}.`);
+      endNegotiation(true, userOffer);
     } else {
-      // User offers lower than current price but above minPrice
-      const difference = partnerOffer - userOffer;
-      if (difference <= partnerOffer * 0.05) {
-        // If the counter is only slightly below, seller accepts the offer
-        displayMessage(scenarioData.partnerName + ": Alright, it's a deal at £" + userOffer + ".");
-        partnerOffer = userOffer;
-        endNegotiation(true, partnerOffer);
-      } else {
-        // Otherwise, seller counters by lowering the price (halfway towards user's offer, not below minPrice)
-        let counterOffer = partnerOffer - Math.round(difference / 2);
-        if (counterOffer < minPrice) {
-          counterOffer = minPrice;
-        }
-        partnerOffer = counterOffer;
-        if (partnerOffer <= userOffer) {
-          // Counter ended up at or below user's offer (user's offer was close to minPrice)
-          partnerOffer = userOffer;
-          displayMessage(scenarioData.partnerName + ": Alright, I can accept £" + partnerOffer + ".");
-          endNegotiation(true, partnerOffer);
-        } else {
-          if (partnerOffer === minPrice) {
-            // Reached min price, mark as final
-            partnerFinalOfferMade = true;
-            partnerFinalValue = partnerOffer;
-            displayMessage(scenarioData.partnerName + ": I can't go lower than £" + partnerOffer + ".");
-          } else {
-            // Regular counter-offer
-            displayMessage(scenarioData.partnerName + ": How about £" + partnerOffer + "?");
-          }
-          // Continue negotiation
-        }
-      }
+      let counter = partnerOffer - Math.round(diff/2);
+      if (counter < min) { counter = min; partnerFinalOfferMade = true; partnerFinalValue = counter; displayMessage(`Seller: Can't go below £${counter}.`); }
+      else displayMessage(`Seller: Counter £${counter}.`);
+      partnerOffer = counter;
     }
   } else {
-    // Seller had given a final lowest price, and user countered again
     if (userOffer >= partnerFinalValue) {
-      // User came up to (or above) the final price, seller accepts
-      partnerOffer = userOffer;
-      displayMessage(scenarioData.partnerName + ": Alright, you've got a deal at £" + userOffer + ".");
-      endNegotiation(true, partnerOffer);
+      displayMessage(`Seller: Deal at £${userOffer}.`);
+      endNegotiation(true, userOffer);
     } else {
-      // User still below final price -> no deal
-      displayMessage(scenarioData.partnerName + ": £" + partnerFinalValue + " is my final price. We cannot make a deal if you won't meet that.");
+      displayMessage(`Seller: £${partnerFinalValue} was final. No deal.`);
       endNegotiation(false, null);
     }
   }
 }
 
-// Conclude the negotiation and trigger the bonus question
-function endNegotiation(success, dealValue) {
-  if (success) {
-    displayMessage("*** Negotiation successful! Deal reached at £" + dealValue + ". ***");
+// Salary counter logic
+function handleSalaryCounter(userOffer) {
+  const roleData = scenarios.salary.roles[selectedRole];
+  const max = roleData.max;
+  if (!partnerFinalOfferMade) {
+    if (userOffer <= partnerOffer) {
+      displayMessage(`Employer: Accepted £${userOffer}.`);
+      endNegotiation(true, userOffer);
+      return;
+    }
+    if (userOffer > max) {
+      displayMessage(`Employer: Can't exceed £${max}.`);
+      partnerFinalOfferMade = true; partnerFinalValue = max;
+      partnerOffer = max;
+      return;
+    }
+    const diff = userOffer - partnerOffer;
+    if (diff <= partnerOffer * 0.05) {
+      displayMessage(`Employer: OK £${userOffer}.`);
+      endNegotiation(true, userOffer);
+    } else {
+      let counter = partnerOffer + Math.round(diff/2);
+      if (counter >= max) { counter = max; partnerFinalOfferMade = true; partnerFinalValue = max; displayMessage(`Employer: Top is £${max}.`); }
+      else displayMessage(`Employer: Counter £${counter}.`);
+      partnerOffer = counter;
+    }
   } else {
-    displayMessage("*** Negotiation ended with no deal. ***");
+    if (userOffer <= partnerFinalValue) {
+      displayMessage(`Employer: Deal £${userOffer}.`);
+      endNegotiation(true, userOffer);
+    } else {
+      displayMessage(`Employer: £${partnerFinalValue} was final. No deal.`);
+      endNegotiation(false, null);
+    }
   }
-  // After a short pause, present a bonus question
-  setTimeout(showBonusQuestion, 1000);
 }
 
-// Show a bonus question in a centered overlay
+// Request compensation options
+function requestCompensation() {
+  if (incentiveRequestsCount >= scenarios.salary.maxIncentives) { alert('Max requests reached'); return; }
+  compOptionsDiv.innerHTML = '';
+  scenarios.salary.incentivesData.forEach(opt => {
+    if (!requestedIncentives.includes(opt.name)) {
+      const btn = document.createElement('button');
+      btn.textContent = opt.name;
+      btn.className = 'comp-option';
+      btn.onclick = () => {
+        const r = Math.random();
+        let approved = '', val=0, cost=0;
+        // compute cost & value
+        if (opt.costPercent) cost = Math.floor(partnerOffer*opt.costPercent/100);
+        else cost = opt.cost;
+        if (opt.valuePercent) val = Math.floor(partnerOffer*opt.valuePercent/100);
+        else val = opt.value;
+        if (r < 0.4 && employerRemaining >= cost) { approved = 'fully approved'; incentiveBonus += val; employerRemaining -= cost; }
+        else if (r < 0.7 && employerRemaining >= cost/2) { approved = 'partially approved'; incentiveBonus += Math.floor(val/2); employerRemaining -= Math.floor(cost/2); }
+        else { approved = 'not approved'; }
+        displayMessage(`Employer: ${opt.name} ${approved}.`);
+        incentiveRequestsCount++;
+        requestedIncentives.push(opt.name);
+        compOptionsDiv.classList.add('hidden');
+      };
+      compOptionsDiv.appendChild(btn);
+    }
+  });
+  compOptionsDiv.classList.remove('hidden');
+}
+
+// End negotiation & bonus
+function endNegotiation(success, dealValue) {
+  if (success) displayMessage(`*** Deal at £${dealValue} ***`);
+  else displayMessage('*** No deal reached ***');
+  updateHighScores(dealValue);
+  setTimeout(showBonusQuestion, 800);
+}
+
+// Update high scores
+function updateHighScores(dealValue) {
+  if (currentScenario === 'car') {
+    const spec = carSpecs[selectedCar];
+    const sc = spec.initial - dealValue;
+    if (sc > highScores.car[selectedCar]) {
+      highScores.car[selectedCar] = sc;
+      displayMessage('🏆 New high score: ' + sc);
+    }
+  } else if (currentScenario === 'salary') {
+    const init = scenarios.salary.roles[selectedRole].initial;
+    const total = dealValue + incentiveBonus;
+    const pct = Math.floor((total / init)*100);
+    if (pct > highScores.salary) {
+      highScores.salary = pct;
+      displayMessage('🏆 New high score: ' + pct + '%');
+    }
+  }
+  localStorage.setItem('highScores', JSON.stringify(highScores));
+}
+
+// Show high scores screen
+function showHighScores() {
+  scenarioSelectionDiv.classList.add('hidden');
+  highScoreScreenDiv.classList.remove('hidden');
+  let html = '<h3>Car Negotiation</h3><ul>';
+  for (let key in highScores.car) html += `<li>${carSpecs[key].label}: ${highScores.car[key]}</li>`;
+  html += '</ul><h3>Salary Negotiation</h3><p>' + highScores.salary + '%</p>';
+  highScoreListDiv.innerHTML = html;
+}
+
+// Bonus question
 function showBonusQuestion() {
-  // Pick a random question from the current scenario's bonus bank
-  const questions = scenarioData.questions;
-  const questionObj = questions[Math.floor(Math.random() * questions.length)];
-  bonusQuestionText.textContent = questionObj.question;
-  // Reset options and feedback display
+  const qList = scenarios[currentScenario].questions;
+  const q = qList[Math.floor(Math.random()*qList.length)];
+  bonusQuestionText.textContent = q.question;
   bonusOptionsDiv.innerHTML = '';
   bonusFeedback.textContent = '';
-  closeBonusBtn.style.display = 'none';
-  // Generate option buttons for the question
-  const optionButtons = [];
-  questionObj.options.forEach((opt, idx) => {
+  closeBonusBtn.classList.add('hidden');
+  q.options.forEach((opt, idx) => {
     const btn = document.createElement('button');
     btn.textContent = opt;
-    btn.onclick = function() {
-      // Disable all options after an answer is selected
-      optionButtons.forEach(b => b.disabled = true);
-      // Highlight the correct answer
-      optionButtons[questionObj.correct].classList.add('correct');
-      if (idx === questionObj.correct) {
-        // Correct answer chosen
-        bonusFeedback.textContent = `Correct! The correct answer is "${questionObj.options[questionObj.correct]}". +10 bonus points.`;
-        score += 10;
+    btn.onclick = () => {
+      Array.from(bonusOptionsDiv.children).forEach(b=>b.disabled=true);
+      bonusOptionsDiv.children[q.correct].classList.add('correct');
+      if (idx === q.correct) {
+        bonusFeedback.textContent = `Correct! +10 pts. Answer: ${q.options[q.correct]}`;
       } else {
-        // Incorrect answer chosen
-        this.classList.add('incorrect');
-        bonusFeedback.textContent = `Incorrect. The correct answer was "${questionObj.options[questionObj.correct]}". +0 points.`;
+        bonusOptionsDiv.children[idx].classList.add('incorrect');
+        bonusFeedback.textContent = `Wrong. Correct: ${q.options[q.correct]}`;
       }
-      // Show the continue button to close the overlay
-      closeBonusBtn.style.display = 'inline-block';
+      closeBonusBtn.classList.remove('hidden');
     };
     bonusOptionsDiv.appendChild(btn);
-    optionButtons.push(btn);
   });
-  // Display the bonus question overlay
-  bonusOverlay.style.display = 'flex';
+  bonusOverlay.classList.remove('hidden');
 }
-
-// Close the bonus overlay and reset the game interface
-closeBonusBtn.addEventListener('click', function() {
-  bonusOverlay.style.display = 'none';
-  // Return to scenario selection for another play
-  negotiationInterfaceDiv.style.display = 'none';
-  scenarioSelectionDiv.style.display = 'block';
-});
-
-// Event listeners for negotiation actions
-negotiateButton.addEventListener('click', function() {
-  if (currentScenario === 'salary' && offerInput.style.display === 'none') {
-    // On first click in salary scenario, reveal the input field
-    offerInput.style.display = 'inline-block';
-    offerInput.focus();
-    negotiateButton.textContent = 'Submit Offer';
-  } else {
-    // Otherwise, treat click as submitting the offer (car scenario or salary after input shown)
-    processUserOffer();
-  }
-});
-
-acceptButton.addEventListener('click', function() {
-  // User accepts the current partner offer at any time
-  displayMessage("You: I accept £" + partnerOffer + ".");
-  endNegotiation(true, partnerOffer);
-});
