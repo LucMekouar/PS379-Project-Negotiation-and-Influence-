@@ -2,83 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Negotiation Master</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Scenario Selection -->
-  <div id="scenarioSelection">
-    <h1>Negotiation Master</h1>
-    <button id="salaryScenarioBtn">Salary Negotiation</button>
-    <button id="carScenarioBtn">Car Price Negotiation</button>
-    <button id="viewHighScoresBtn">High Scores</button>
+
+<!-- Scenario Selection -->
+<div id="scenarioSelection">
+  <h1>Negotiation Master</h1>
+  <p>Select a scenario to begin:</p>
+  <button onclick="startScenario('salary')">Salary Negotiation</button>
+  <button onclick="startScenario('car')">Car Price Negotiation</button>
+</div>
+
+<!-- Negotiation Interface -->
+<div id="negotiationInterface" style="display:none;">
+  <h2 id="scenarioTitle"></h2>
+  <div id="dialogue"></div>
+  <div id="userActions">
+    <input type="number" id="offerInput" placeholder="" />
+    <button id="negotiateButton"></button>
+    <button id="acceptButton">Accept Deal</button>
   </div>
+</div>
 
-  <!-- Car Selection -->
-  <div id="carSelection" class="hidden">
-    <h2>Choose Your Car</h2>
-    <div class="car-options">
-      <div class="car-option" data-car="new_car">
-        <img src="new_car.png" alt="New Car">
-        <p>New Car</p>
-      </div>
-      <div class="car-option" data-car="old_car">
-        <img src="old_car.png" alt="Old Car">
-        <p>Old Car</p>
-      </div>
-      <div class="car-option" data-car="antique">
-        <img src="antique.png" alt="Antique Car">
-        <p>Antique Car</p>
-      </div>
-    </div>
-    <button class="back-btn" id="backFromCarSelect">Back</button>
+<!-- Bonus Question Overlay -->
+<div id="bonusOverlay" class="bonus-overlay" style="display:none;">
+  <div class="bonus-content">
+    <h3>Bonus Question</h3>
+    <p id="bonusQuestionText"></p>
+    <div id="bonusOptions"></div>
+    <p id="bonusFeedback"></p>
+    <button id="closeBonusBtn" style="display:none;">Continue</button>
   </div>
+</div>
 
-  <!-- Role Selection -->
-  <div id="roleSelection" class="hidden">
-    <h2>Salary Negotiation - Choose Your Role</h2>
-    <button class="role-btn" data-role="high">Better-than-Average Employee</button>
-    <button class="role-btn" data-role="low">Average Employee</button>
-    <button class="back-btn" id="backFromRoleSelect">Back</button>
-  </div>
-
-  <!-- Negotiation Interface -->
-  <div id="negotiationInterface" class="hidden">
-    <h2 id="scenarioTitle"></h2>
-    <!-- Agent Avatar -->
-    <img id="agentAvatar" src="" alt="Negotiator Avatar" class="avatar" />
-    <!-- Main scenario image (car/employer) -->
-    <img id="negotiationImage" src="" alt="Negotiation Context" />
-
-    <div id="dialogue"></div>
-    <div id="userActions">
-      <input type="number" id="offerInput" placeholder="" />
-      <button id="negotiateButton"></button>
-      <button id="requestCompBtn">Request Compensation</button>
-      <button id="acceptButton">Accept Deal</button>
-    </div>
-    <div id="compensationOptions" class="hidden"></div>
-  </div>
-
-  <!-- Bonus Question Overlay -->
-  <div id="bonusOverlay" class="bonus-overlay hidden">
-    <div class="bonus-content">
-      <h3>Bonus Question</h3>
-      <p id="bonusQuestionText"></p>
-      <div id="bonusOptions"></div>
-      <p id="bonusFeedback"></p>
-      <button id="closeBonusBtn" class="hidden">Continue</button>
-    </div>
-  </div>
-
-  <!-- High Scores Screen -->
-  <div id="highScoreScreen" class="hidden">
-    <h2>High Scores</h2>
-    <div id="highScoreList"></div>
-    <button id="backFromHighScoresBtn">Back</button>
-  </div>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
