@@ -1,3 +1,9 @@
+/**
+ * Negotiation Master - Core Game Logic
+ * Supports two scenarios (car and salary), bonus questions on negotiation theory,
+ * compensation requests, and high-score tracking in localStorage.
+ */
+
 // ---- Global State ----
 let currentScenario = null;
 let selectedCar = null;
@@ -20,44 +26,46 @@ let highScores = JSON.parse(localStorage.getItem('highScores')) || {
 const carSpecs = {
   new_car:    { label: 'New Car',     image: 'new_car.png',    initial: 50000, min: 35000 },
   old_car:    { label: 'Old Car',     image: 'old_car.png',    initial: 10000, min: 8000  },
-  antique:    { label: 'Antique Car', image: 'antique.png',     initial: 13000, min: 10000 }
+  antique:    { label: 'Antique Car',  image: 'antique.png',     initial: 13000, min: 10000 }
 };
 
-// Scenario definitions
+// Scenario definitions with bonus questions (including reservation & aspiration price)
 const scenarios = {
   salary: {
     name: 'Salary Negotiation',
+    avatar: 'seller.jpg',  // negotiator avatar
     image: 'employer-interview_picture.png',
     questions: [
-      { question: "What does the term '3D negotiation' refer to?", options: [
-          "Using three separate negotiation tactics one after the other.",
-          "Negotiating beyond the table by shaping deal design and setup.",
-          "A negotiation involving three or more parties.",
-          "A method focusing on three critical factors only."
+      // negotiation theory questions
+      { question: "What does '3D negotiation' refer to?", options: [
+          "Sequential tactics.",
+          "Shaping deal setup away from the table.",
+          "Three parties at the table.",
+          "Three critical factors."
         ], correct: 1 },
       { question: "System 1 vs System 2 thinking describes:", options: [
           "Competitive vs cooperative tactics.",
-          "Intuitive (fast) vs analytical (slow) thinking.",
-          "Having a backup negotiator.",
-          "Making first vs second offers."
+          "Fast, intuitive vs slow, analytical thinking.",
+          "Backup negotiator strategies.",
+          "Offer order dynamics."
         ], correct: 1 },
-      { question: "Leverage in negotiation is best defined as:", options: [
-          "Strictly sticking to your initial position.",
-          "Persuasive emotional appeals.",
-          "The power one side has to influence outcome.",
-          "Offering concessions only."
+      { question: "What is a reservation price?", options: [
+          "Your ideal target outcome.",
+          "The lowest you're willing to accept before walking away.",
+          "The first offer anchor.",
+          "A bonus incentive."
+        ], correct: 1 },
+      { question: "What is an aspiration price?", options: [
+          "The lowest acceptable limit.",
+          "Your best alternative outside the deal.",
+          "Your target or ideal negotiated outcome.",
+          "A price suggested by the other party."
         ], correct: 2 },
       { question: "Anchoring bias means:", options: [
-          "Refusing to move from the initial offer.",
-          "The first offer sets a reference point.",
-          "Focusing on one issue only.",
-          "Building rapport first."
-        ], correct: 1 },
-      { question: "Interest-based bargaining focuses on:", options: [
-          "Insisting demands.",
-          "Underlying interests for win-win outcomes.",
-          "Compromises without discussion.",
-          "Hiding true goals."
+          "Never move from an initial offer.",
+          "The first number sets the reference point.",
+          "Focus on one issue only.",
+          "Build rapport first."
         ], correct: 1 }
     ],
     roles: {
@@ -75,48 +83,50 @@ const scenarios = {
   },
   car: {
     name: 'Car Price Negotiation',
+    avatar: 'seller.jpg',
     questions: [
       { question: "What is 3D negotiation?", options: [
           "Three tactics sequentially.",
-          "Shaping deal design away from the table.",
-          "Three or more parties.",
+          "Shaping deal setup off-table.",
+          "Three parties at once.",
           "Three-factor method."
         ], correct: 1 },
       { question: "System 1 vs System 2:", options: [
           "Competitive vs cooperative.",
-          "Intuitive vs analytical.",
+          "Intuitive vs analytical thinking.",
           "Backup negotiator.",
-          "Offer order."
+          "Offer sequence."
         ], correct: 1 },
-      { question: "Leverage is:", options: [
-          "Sticking to demands.",
-          "Emotional appeals.",
-          "Influence power.",
-          "Only concessions."
-        ], correct: 2 },
+      { question: "Reservation price is:", options: [
+          "Your ideal target.",
+          "Your walk-away limit.",
+          "First anchor set.",
+          "A concession strategy."
+        ], correct: 1 },
+      { question: "Aspiration price means:", options: [
+          "Lowest acceptable limit.",
+          "Target outcome you aim for.",
+          "Opponent's opening offer.",
+          "Fallback alternative."
+        ], correct: 1 },
       { question: "Anchoring bias:", options: [
           "Refuse to budge.",
-          "First offer as reference.",
+          "First number sets the tone.",
           "Single-issue focus.",
-          "Build rapport."
-        ], correct: 1 },
-      { question: "Interest-based bargaining:", options: [
-          "Insist demands.",
-          "Win-win via interests.",
-          "Compromise only.",
-          "Hide goals."
+          "Emotional leverage."
         ], correct: 1 }
     ]
   }
 };
 
-// DOM Elements
+// DOM references
 const scenarioSelectionDiv = document.getElementById('scenarioSelection');
 const carSelectionDiv      = document.getElementById('carSelection');
 const roleSelectionDiv     = document.getElementById('roleSelection');
 const negotiationDiv       = document.getElementById('negotiationInterface');
 const dialogueDiv          = document.getElementById('dialogue');
 const titleEl              = document.getElementById('scenarioTitle');
+const avatarEl             = document.getElementById('agentAvatar');
 const imgEl                = document.getElementById('negotiationImage');
 const offerInput           = document.getElementById('offerInput');
 const negotiateBtn         = document.getElementById('negotiateButton');
@@ -131,53 +141,38 @@ const closeBonusBtn        = document.getElementById('closeBonusBtn');
 const highScoreScreenDiv   = document.getElementById('highScoreScreen');
 const highScoreListDiv     = document.getElementById('highScoreList');
 
-// Buttons
-document.getElementById('salaryScenarioBtn').onclick = showRoleSelection;
-document.getElementById('carScenarioBtn').onclick    = showCarSelection;
+// Button bindings
+document.getElementById('salaryScenarioBtn').onclick = () => swapScreen(scenarioSelectionDiv, roleSelectionDiv);
+document.getElementById('carScenarioBtn').onclick    = () => swapScreen(scenarioSelectionDiv, carSelectionDiv);
 document.getElementById('viewHighScoresBtn').onclick = showHighScores;
 document.getElementById('backFromCarSelect').onclick = () => swapScreen(carSelectionDiv, scenarioSelectionDiv);
 document.getElementById('backFromRoleSelect').onclick= () => swapScreen(roleSelectionDiv, scenarioSelectionDiv);
 document.getElementById('backFromHighScoresBtn').onclick = () => swapScreen(highScoreScreenDiv, scenarioSelectionDiv);
 
-// Car options
-Array.from(document.querySelectorAll('.car-option')).forEach(el => {
-  el.onclick = () => { selectedCar = el.dataset.car; startCarNegotiation(); };
-});
-// Role options
-Array.from(document.querySelectorAll('.role-btn')).forEach(el => {
-  el.onclick = () => { selectedRole = el.dataset.role; startSalaryNegotiation(); };
-});
+// Car & role option selection
+document.querySelectorAll('.car-option').forEach(el => el.onclick = () => { selectedCar = el.dataset.car; startCarNegotiation(); });
+document.querySelectorAll('.role-btn').forEach(el => el.onclick = () => { selectedRole = el.dataset.role; startSalaryNegotiation(); });
 
 // Negotiation actions
-negotiateBtn.onclick = () => {
+negotiateBtn.onclick   = () => {
   if (currentScenario === 'salary' && offerInput.style.display === 'none') {
-    // reveal input the first time
+    // reveal input on first click
     offerInput.style.display = 'inline-block';
     offerInput.placeholder = 'Propose your salary in £';
     negotiateBtn.textContent = 'Submit Offer';
-    return;
-  }
-  processUserOffer();
+  } else processUserOffer();
 };
 requestCompBtn.onclick = () => requestCompensation();
-acceptBtn.onclick = () => {
-  displayMessage(`You accept £${partnerOffer}`);
-  endNegotiation(true, partnerOffer);
-};
+acceptBtn.onclick      = () => { displayMessage(`You accept £${partnerOffer}`); endNegotiation(true, partnerOffer); };
+closeBonusBtn.onclick  = () => { bonusOverlay.classList.add('hidden'); swapScreen(negotiationDiv, scenarioSelectionDiv); };
 
-closeBonusBtn.onclick = () => {
-  bonusOverlay.classList.add('hidden');
-  negotiationDiv.classList.add('hidden');
-  swapScreen(negotiationDiv, scenarioSelectionDiv);
-};
-
-// Show/Hide helper
+// Screen swap helper
 function swapScreen(hideEl, showEl) {
   hideEl.classList.add('hidden');
   showEl.classList.remove('hidden');
 }
 
-// Display a dialogue message
+// Append dialogue message
 function displayMessage(text) {
   const p = document.createElement('p');
   p.textContent = text;
@@ -185,19 +180,17 @@ function displayMessage(text) {
   dialogueDiv.scrollTop = dialogueDiv.scrollHeight;
 }
 
-// Start Car Negotiation
+// Start car negotiation
 function startCarNegotiation() {
   currentScenario = 'car';
-  scenarioSelectionDiv.classList.add('hidden');
-  carSelectionDiv.classList.add('hidden');
-  negotiationDiv.classList.remove('hidden');
-
+  swapScreen(carSelectionDiv, negotiationDiv);
   const spec = carSpecs[selectedCar];
   partnerOffer = spec.initial;
   partnerFinalOfferMade = false;
   incentiveBonus = 0;
   dialogueDiv.innerHTML = '';
   titleEl.textContent = scenarios.car.name;
+  avatarEl.src = scenarios.car.avatar;
   imgEl.src = spec.image;
   offerInput.style.display = 'inline-block';
   offerInput.value = '';
@@ -205,17 +198,13 @@ function startCarNegotiation() {
   negotiateBtn.textContent = 'Submit Offer';
   requestCompBtn.style.display = 'none';
   compOptionsDiv.classList.add('hidden');
-
   displayMessage(`${scenarios.car.name} - Asking price: £${partnerOffer}`);
 }
 
-// Start Salary Negotiation
+// Start salary negotiation
 function startSalaryNegotiation() {
   currentScenario = 'salary';
-  scenarioSelectionDiv.classList.add('hidden');
-  roleSelectionDiv.classList.add('hidden');
-  negotiationDiv.classList.remove('hidden');
-
+  swapScreen(roleSelectionDiv, negotiationDiv);
   const roleData = scenarios.salary.roles[selectedRole];
   partnerOffer = roleData.initial;
   employerRemaining = roleData.max - roleData.initial;
@@ -225,95 +214,63 @@ function startSalaryNegotiation() {
   incentiveRequestsCount = 0;
   dialogueDiv.innerHTML = '';
   titleEl.textContent = scenarios.salary.name;
+  avatarEl.src = scenarios.salary.avatar;
   imgEl.src = scenarios.salary.image;
-
   offerInput.style.display = 'none';
   negotiateBtn.textContent = 'Negotiate Salary';
   requestCompBtn.style.display = 'inline-block';
   compOptionsDiv.classList.add('hidden');
-
   displayMessage(`${scenarios.salary.name} - Employer offers £${partnerOffer}`);
 }
 
 // Process user offer input
 function processUserOffer() {
   const val = parseInt(offerInput.value);
-  if (isNaN(val) || val <= 0) { alert('Enter a valid number'); return; }
+  if (isNaN(val) || val <= 0) { alert('Enter a positive number'); return; }
   displayMessage(`You propose £${val}`);
   if (currentScenario === 'car') handleCarCounter(val);
-  else if (currentScenario === 'salary') handleSalaryCounter(val);
+  else handleSalaryCounter(val);
   offerInput.value = '';
 }
 
 // Car counter logic
 function handleCarCounter(userOffer) {
   const spec = carSpecs[selectedCar];
-  const min = spec.min;
   if (!partnerFinalOfferMade) {
-    if (userOffer >= partnerOffer) {
-      displayMessage(`Seller: Deal at £${userOffer}!`);
-      endNegotiation(true, userOffer);
-      return;
-    }
+    if (userOffer >= partnerOffer) return displayMessage(`Seller: Deal at £${userOffer}!`), endNegotiation(true, userOffer);
     const diff = partnerOffer - userOffer;
-    if (diff <= partnerOffer * 0.05) {
-      displayMessage(`Seller: Fine, £${userOffer}.`);
-      endNegotiation(true, userOffer);
-    } else {
-      let counter = partnerOffer - Math.round(diff/2);
-      if (counter < min) { counter = min; partnerFinalOfferMade = true; partnerFinalValue = counter; displayMessage(`Seller: Can't go below £${counter}.`); }
-      else displayMessage(`Seller: Counter £${counter}.`);
-      partnerOffer = counter;
-    }
+    if (diff <= partnerOffer * 0.05) return displayMessage(`Seller: Fine, £${userOffer}.`), endNegotiation(true, userOffer);
+    let counter = partnerOffer - Math.round(diff/2);
+    if (counter < spec.min) { counter = spec.min; partnerFinalOfferMade = true; partnerFinalValue = counter; displayMessage(`Seller: Can't go below £${counter}.`); }
+    else displayMessage(`Seller: Counter £${counter}.`);
+    partnerOffer = counter;
   } else {
-    if (userOffer >= partnerFinalValue) {
-      displayMessage(`Seller: Deal at £${userOffer}.`);
-      endNegotiation(true, userOffer);
-    } else {
-      displayMessage(`Seller: £${partnerFinalValue} was final. No deal.`);
-      endNegotiation(false, null);
-    }
+    if (userOffer >= partnerFinalValue) return displayMessage(`Seller: Deal at £${userOffer}.`), endNegotiation(true, userOffer);
+    displayMessage(`Seller: £${partnerFinalValue} was final. No deal.`);
+    endNegotiation(false, null);
   }
 }
 
 // Salary counter logic
 function handleSalaryCounter(userOffer) {
   const roleData = scenarios.salary.roles[selectedRole];
-  const max = roleData.max;
   if (!partnerFinalOfferMade) {
-    if (userOffer <= partnerOffer) {
-      displayMessage(`Employer: Accepted £${userOffer}.`);
-      endNegotiation(true, userOffer);
-      return;
-    }
-    if (userOffer > max) {
-      displayMessage(`Employer: Can't exceed £${max}.`);
-      partnerFinalOfferMade = true; partnerFinalValue = max;
-      partnerOffer = max;
-      return;
-    }
+    if (userOffer <= partnerOffer) return displayMessage(`Employer: Accepted £${userOffer}.`), endNegotiation(true, userOffer);
+    if (userOffer > roleData.max) { partnerFinalOfferMade = true; partnerFinalValue = roleData.max; partnerOffer = roleData.max; return displayMessage(`Employer: Can't exceed £${roleData.max}.`); }
     const diff = userOffer - partnerOffer;
-    if (diff <= partnerOffer * 0.05) {
-      displayMessage(`Employer: OK £${userOffer}.`);
-      endNegotiation(true, userOffer);
-    } else {
-      let counter = partnerOffer + Math.round(diff/2);
-      if (counter >= max) { counter = max; partnerFinalOfferMade = true; partnerFinalValue = max; displayMessage(`Employer: Top is £${max}.`); }
-      else displayMessage(`Employer: Counter £${counter}.`);
-      partnerOffer = counter;
-    }
+    if (diff <= partnerOffer * 0.05) return displayMessage(`Employer: OK £${userOffer}.`), endNegotiation(true, userOffer);
+    let counter = partnerOffer + Math.round(diff/2);
+    if (counter >= roleData.max) { counter = roleData.max; partnerFinalOfferMade = true; partnerFinalValue = counter; displayMessage(`Employer: Top is £${counter}.`); }
+    else displayMessage(`Employer: Counter £${counter}.`);
+    partnerOffer = counter;
   } else {
-    if (userOffer <= partnerFinalValue) {
-      displayMessage(`Employer: Deal £${userOffer}.`);
-      endNegotiation(true, userOffer);
-    } else {
-      displayMessage(`Employer: £${partnerFinalValue} was final. No deal.`);
-      endNegotiation(false, null);
-    }
+    if (userOffer <= partnerFinalValue) return displayMessage(`Employer: Deal £${userOffer}.`), endNegotiation(true, userOffer);
+    displayMessage(`Employer: £${partnerFinalValue} was final. No deal.`);
+    endNegotiation(false, null);
   }
 }
 
-// Request compensation options
+// Compensation request
 function requestCompensation() {
   if (incentiveRequestsCount >= scenarios.salary.maxIncentives) { alert('Max requests reached'); return; }
   compOptionsDiv.innerHTML = '';
@@ -324,16 +281,11 @@ function requestCompensation() {
       btn.className = 'comp-option';
       btn.onclick = () => {
         const r = Math.random();
-        let approved = '', val=0, cost=0;
-        // compute cost & value
-        if (opt.costPercent) cost = Math.floor(partnerOffer*opt.costPercent/100);
-        else cost = opt.cost;
-        if (opt.valuePercent) val = Math.floor(partnerOffer*opt.valuePercent/100);
-        else val = opt.value;
-        if (r < 0.4 && employerRemaining >= cost) { approved = 'fully approved'; incentiveBonus += val; employerRemaining -= cost; }
-        else if (r < 0.7 && employerRemaining >= cost/2) { approved = 'partially approved'; incentiveBonus += Math.floor(val/2); employerRemaining -= Math.floor(cost/2); }
-        else { approved = 'not approved'; }
-        displayMessage(`Employer: ${opt.name} ${approved}.`);
+        let cost = opt.costPercent ? Math.floor(partnerOffer*opt.costPercent/100) : opt.cost;
+        let val  = opt.valuePercent ? Math.floor(partnerOffer*opt.valuePercent/100) : opt.value;
+        if (r < 0.4 && employerRemaining >= cost) { incentiveBonus += val; employerRemaining -= cost; displayMessage(`Employer: ${opt.name} fully approved.`); }
+        else if (r < 0.7 && employerRemaining >= cost/2) { incentiveBonus += Math.floor(val/2); employerRemaining -= Math.floor(cost/2); displayMessage(`Employer: ${opt.name} partially approved.`); }
+        else displayMessage(`Employer: Cannot accommodate ${opt.name}.`);
         incentiveRequestsCount++;
         requestedIncentives.push(opt.name);
         compOptionsDiv.classList.add('hidden');
@@ -344,46 +296,37 @@ function requestCompensation() {
   compOptionsDiv.classList.remove('hidden');
 }
 
-// End negotiation & bonus
+// End negotiation and schedule bonus question
 function endNegotiation(success, dealValue) {
-  if (success) displayMessage(`*** Deal at £${dealValue} ***`);
-  else displayMessage('*** No deal reached ***');
+  displayMessage(success ? `*** Deal reached at £${dealValue} ***` : '*** Negotiation ended with no deal ***');
   updateHighScores(dealValue);
   setTimeout(showBonusQuestion, 800);
 }
 
-// Update high scores
+// High-score logic
 function updateHighScores(dealValue) {
   if (currentScenario === 'car') {
-    const spec = carSpecs[selectedCar];
-    const sc = spec.initial - dealValue;
-    if (sc > highScores.car[selectedCar]) {
-      highScores.car[selectedCar] = sc;
-      displayMessage('🏆 New high score: ' + sc);
-    }
-  } else if (currentScenario === 'salary') {
+    const sc = carSpecs[selectedCar].initial - dealValue;
+    if (sc > highScores.car[selectedCar]) { highScores.car[selectedCar] = sc; displayMessage(`🏆 New high score: ${sc}`); }
+  } else {
     const init = scenarios.salary.roles[selectedRole].initial;
     const total = dealValue + incentiveBonus;
     const pct = Math.floor((total / init)*100);
-    if (pct > highScores.salary) {
-      highScores.salary = pct;
-      displayMessage('🏆 New high score: ' + pct + '%');
-    }
+    if (pct > highScores.salary) { highScores.salary = pct; displayMessage(`🏆 New high score: ${pct}%`); }
   }
   localStorage.setItem('highScores', JSON.stringify(highScores));
 }
 
 // Show high scores screen
 function showHighScores() {
-  scenarioSelectionDiv.classList.add('hidden');
-  highScoreScreenDiv.classList.remove('hidden');
+  swapScreen(scenarioSelectionDiv, highScoreScreenDiv);
   let html = '<h3>Car Negotiation</h3><ul>';
   for (let key in highScores.car) html += `<li>${carSpecs[key].label}: ${highScores.car[key]}</li>`;
   html += '</ul><h3>Salary Negotiation</h3><p>' + highScores.salary + '%</p>';
   highScoreListDiv.innerHTML = html;
 }
 
-// Bonus question
+// Bonus question overlay
 function showBonusQuestion() {
   const qList = scenarios[currentScenario].questions;
   const q = qList[Math.floor(Math.random()*qList.length)];
@@ -392,17 +335,12 @@ function showBonusQuestion() {
   bonusFeedback.textContent = '';
   closeBonusBtn.classList.add('hidden');
   q.options.forEach((opt, idx) => {
-    const btn = document.createElement('button');
-    btn.textContent = opt;
+    const btn = document.createElement('button'); btn.textContent = opt;
     btn.onclick = () => {
-      Array.from(bonusOptionsDiv.children).forEach(b=>b.disabled=true);
+      Array.from(bonusOptionsDiv.children).forEach(b => b.disabled = true);
       bonusOptionsDiv.children[q.correct].classList.add('correct');
-      if (idx === q.correct) {
-        bonusFeedback.textContent = `Correct! +10 pts. Answer: ${q.options[q.correct]}`;
-      } else {
-        bonusOptionsDiv.children[idx].classList.add('incorrect');
-        bonusFeedback.textContent = `Wrong. Correct: ${q.options[q.correct]}`;
-      }
+      if (idx === q.correct) bonusFeedback.textContent = `Correct! +10 pts. Answer: ${q.options[q.correct]}`;
+      else { bonusOptionsDiv.children[idx].classList.add('incorrect'); bonusFeedback.textContent = `Wrong. Correct: ${q.options[q.correct]}`; }
       closeBonusBtn.classList.remove('hidden');
     };
     bonusOptionsDiv.appendChild(btn);
