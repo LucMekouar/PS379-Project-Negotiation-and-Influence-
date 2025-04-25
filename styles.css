@@ -1,4 +1,3 @@
-/* styles.css — UPDATED */
 :root {
   --primary-color: #2A2A2A;
   --accent-color: #FF6B6B;
@@ -189,19 +188,6 @@ button:hover {
   border-top: 0;
 }
 
-/* OFFER HISTORY BOX */
-#offer-history {
-  margin-top: 1rem;
-  max-height: 100px;
-  overflow-y: auto;
-  background: #444;
-  padding: 1rem;
-  border-radius: var(--border-radius);
-  text-align: left;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
 #offer-input {
   padding: 1rem;
   border: 2px solid var(--accent-color);
@@ -234,23 +220,6 @@ button:hover {
 #ai-options button,
 #salary-incentives button {
   margin: 0.5rem;
-}
-
-/* Bonus Question Panel */
-#bonus-panel {
-  margin-top: 2rem;
-  background: #555;
-  padding: 1rem;
-  border-radius: var(--border-radius);
-  text-align: left;
-}
-#bonus-panel h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-}
-#bonus-panel .bonus-option {
-  display: block;
-  margin: 0.5rem 0;
 }
 
 /* Congratulations Screen */
