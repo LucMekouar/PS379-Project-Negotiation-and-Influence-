@@ -1,146 +1,198 @@
-/* Styles for Negotiation Master game (dark tech theme) */
+/* Global styles */
 body {
-  background-color: #111;
-  color: #eee;
-  font-family: 'Lucida Console', Courier, monospace;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
   margin: 0;
   padding: 0;
+  color: #333;
 }
-/* Main title styling */
-h1 {
+
+/* Main menu container */
+#menu {
   text-align: center;
-  color: #fff;
-  font-size: 2em;
-  margin: 20px 0 30px;
-  text-shadow: 0 0 5px #0f0;  /* slight glow effect */
+  padding: 50px 20px;
 }
-/* Center the scenario selection menu */
-#scenarioSelect {
-  text-align: center;
-  padding-top: 50px;
-}
-/* Scenario selection prompt text */
-#scenarioSelect p {
-  margin-bottom: 10px;
-}
-/* Buttons (scenario selection, submit, etc.) base style */
-button {
-  background-color: #333;
-  color: #fff;
-  border: 1px solid #0f0;
-  border-radius: 4px;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: box-shadow 0.2s ease-in-out;
-}
-/* Hover/focus effect for buttons */
-button:hover, button:focus {
-  outline: none;
-  box-shadow: 0 0 8px #0f0;
-}
-/* Spacing between scenario selection buttons */
-#scenarioSelect button {
-  margin: 5px 10px;
-}
-/* Negotiation container layout */
-#negotiationContainer {
+
+/* Scenario/game container */
+#game {
+  width: 90%;
   max-width: 600px;
-  margin: 20px auto;
-  padding: 0 20px;
+  margin: 40px auto;
+  background: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
-/* Scenario title inside negotiation container */
-#negotiationContainer h2 {
+
+/* Scenario title */
+#scenario-title {
   text-align: center;
-  margin-bottom: 15px;
-  color: #fff;
+  margin-top: 0;
 }
-/* Conversation log area styling */
-#log {
-  background-color: #222;
+
+/* Negotiator image styling */
+#negotiator-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 10px auto 20px auto;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Dialogue box */
+#dialogue {
+  min-height: 100px;
+  background: #e8ebef;
   padding: 10px;
   border-radius: 5px;
-  max-height: 400px;
-  overflow-y: auto;
+  margin-bottom: 15px;
+  font-size: 0.95em;
+  line-height: 1.5;
 }
-/* User and opponent message text styles */
-.user-msg {
-  color: #fff;
-}
-.opponent-msg {
-  color: #0f0;  /* opponent (AI/dealer/boss) text in accent color */
-}
-/* Each message in log spacing */
-#log p {
-  margin: 0.5em 0;
-}
-/* Offer input and submit section */
-#offerSection {
-  margin-top: 10px;
-}
-#offerSection input[type=number] {
-  background-color: #333;
-  color: #fff;
-  border: 1px solid #0f0;
-  border-radius: 4px;
-  padding: 5px;
-  width: 120px;
-  margin-right: 5px;
-}
-#offerSection input[type=number]::placeholder {
-  color: #aaa;
-}
-/* Remove spinner arrows for number input in browsers */
-#offerSection input[type=number]::-webkit-outer-spin-button,
-#offerSection input[type=number]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-#offerSection input[type=number] {
-  -moz-appearance: textfield;
-}
-/* Modal overlay for bonus question */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-/* Modal content box styling */
-.modal-content {
-  background-color: #111;
-  border: 1px solid #0f0;
-  padding: 20px;
-  border-radius: 5px;
-  max-width: 400px;
-  color: #fff;
-}
-/* Modal heading for bonus question */
-.modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  text-align: center;
-  color: #0f0;
-}
-/* Bonus answer option buttons */
-.option-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
+#dialogue p {
   margin: 5px 0;
 }
-/* Feedback text in bonus modal */
-#bonusFeedback {
-  margin-top: 10px;
+#dialogue .you {
   font-weight: bold;
 }
-/* Continue button in modal (centered) */
-#continueBtn {
-  display: block;
-  margin: 10px auto 0;
+#dialogue .npc {
+  /* You can italicize or style NPC dialogue if desired */
+}
+
+/* Offer input section */
+#offer-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+#offer-input {
+  flex: 1;
+  padding: 8px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+#offer-input:focus {
+  border-color: #66afe9;
+  outline: none;
+  box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+}
+
+/* Buttons (general) */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Menu and navigation buttons */
+#start-car, #start-salary, #start-ai {
+  font-size: 1em;
+  padding: 12px 20px;
+  margin: 10px;
+  background: linear-gradient(to bottom, #2196F3, #1976D2);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+#start-car:hover, #start-salary:hover, #start-ai:hover {
+  /* Slightly lighten on hover */
+  background: linear-gradient(to bottom, #42A5F5, #1E88E5);
+}
+
+/* Submit offer and continue buttons */
+#submit-offer, #continue-btn {
+  background: linear-gradient(to bottom, #4CAF50, #388E3C);
+  color: #fff;
+  font-size: 1em;
+  padding: 10px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+#submit-offer:hover, #continue-btn:hover {
+  background: linear-gradient(to bottom, #66BB6A, #43A047);
+}
+
+/* Back button */
+#back-btn {
+  background: linear-gradient(to bottom, #f44336, #d32f2f);
+  color: #fff;
+  font-size: 0.9em;
+  padding: 8px 14px;
+  position: relative;
+  float: right;
+  margin-top: -40px; /* position back button at top right of the game box */
+  margin-right: -10px;
+}
+#back-btn:hover {
+  background: linear-gradient(to bottom, #e57373, #e53935);
+}
+
+/* Outcome text */
+#outcome {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+/* Bonus question styles */
+#bonus-question {
+  background: #f5f5f5;
+  border-radius: 5px;
+  padding: 15px;
+}
+#question-text {
+  font-weight: bold;
+}
+#options-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+#options-list li {
+  margin-bottom: 8px;
+}
+.option-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.95em;
+  border: 1px solid #ccc;
+  background: #eee;
+  color: #000;
+  border-radius: 4px;
+}
+.option-btn:hover {
+  background: #e0e0e0;
+}
+.option-btn.correct {
+  background: #c8e6c9; /* light green */
+}
+.option-btn.wrong {
+  background: #ffcdd2; /* light red */
+}
+/* Keep highlighted options visible even if disabled */
+.option-btn:disabled.correct, .option-btn:disabled.wrong {
+  opacity: 1;
+}
+/* Disabled options (not chosen) can be slightly faded */
+.option-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* Answer feedback text */
+#answer-feedback.correct {
+  color: green;
+}
+#answer-feedback.wrong {
+  color: red;
+}
+#answer-feedback {
+  font-weight: bold;
+  margin-top: 10px;
 }

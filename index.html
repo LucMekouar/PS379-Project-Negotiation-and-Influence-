@@ -1,48 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Negotiation Master</title>
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Negotiation Master</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-    <!-- Main title of the game -->
+  <!-- Main Menu -->
+  <div id="menu">
     <h1>Negotiation Master</h1>
+    <p>Choose a scenario to test your negotiation skills:</p>
+    <button id="start-car">Car Negotiation</button>
+    <button id="start-salary">Salary Negotiation</button>
+    <button id="start-ai">Rogue AI Negotiation</button>
+  </div>
 
-    <!-- Scenario selection menu -->
-    <div id="scenarioSelect">
-        <p>Choose a scenario to begin negotiation training:</p>
-        <button id="carBtn">Buy a Car</button>
-        <button id="aiBtn">Rogue AI</button>
-        <button id="salaryBtn">Salary Negotiation</button>
+  <!-- Game Scenario Container (hidden until a scenario starts) -->
+  <div id="game" style="display: none;">
+    <!-- Scenario Title -->
+    <h2 id="scenario-title"></h2>
+    <!-- Negotiator Image -->
+    <img id="negotiator-img" src="" alt="Negotiator" />
+    <!-- Dialogue / Negotiation text area -->
+    <div id="dialogue"></div>
+    <!-- User offer input and submit (for applicable scenarios) -->
+    <div id="offer-section">
+      <input type="number" id="offer-input" placeholder="" />
+      <button id="submit-offer">Submit Offer</button>
     </div>
-
-    <!-- Negotiation interface (hidden initially) -->
-    <div id="negotiationContainer" style="display:none;">
-        <!-- Scenario title (set dynamically when a scenario starts) -->
-        <h2 id="scenarioTitle"></h2>
-        <!-- Conversation log where messages will appear -->
-        <div id="log"></div>
-        <!-- User input section for making an offer -->
-        <div id="offerSection">
-            <input type="number" id="offerInput" placeholder="" />
-            <button id="submitOffer">Submit</button>
-        </div>
+    <!-- Outcome / result display -->
+    <div id="outcome"></div>
+    <!-- Bonus Question section (hidden until negotiation is concluded) -->
+    <div id="bonus-question" style="display: none;">
+      <p id="question-text"></p>
+      <ul id="options-list"></ul>
+      <p id="answer-feedback"></p>
+      <button id="continue-btn" style="display: none;">Back to Menu</button>
     </div>
+    <!-- Back to menu button (to abort scenario or return after completion) -->
+    <button id="back-btn">Back to Menu</button>
+  </div>
 
-    <!-- Bonus question modal (hidden initially) -->
-    <div id="bonusModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <h3>Bonus Question</h3>
-            <p id="bonusQuestionText"></p>
-            <div id="bonusOptions"></div>
-            <p id="bonusFeedback"></p>
-            <button id="continueBtn" style="display:none;">Continue</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
