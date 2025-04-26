@@ -1,265 +1,174 @@
-/* styles.css */
 :root {
   --primary-color: #2A2A2A;
   --accent-color: #FF6B6B;
   --background-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   --text-primary: #FFFFFF;
-  --text-secondary: #CCCCCC;
   --button-hover: #FF5252;
-  --card-bg: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(255,255,255,0.1);
   --border-radius: 15px;
-  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0 8px 32px rgba(0,0,0,0.1);
 }
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
 body {
-  font-family: 'Poppins', sans-serif;
-  background: var(--background-gradient);
-  color: var(--text-primary);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  font-family:'Poppins',sans-serif;
+  background:var(--background-gradient);
+  color:var(--text-primary);
+  min-height:100vh;
+  display:flex;justify-content:center;align-items:center;
 }
+
 #game-container {
-  width: 95%;
-  max-width: 1200px;
-  padding: 2rem;
-  text-align: center;
+  width:95%;max-width:1200px;
+  padding:2rem;text-align:center;
 }
-h1, h2 {
-  margin-bottom: 1.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+
+h1,h2 {
+  margin-bottom:1.5rem;
+  text-shadow:2px 2px 4px rgba(0,0,0,0.3);
 }
 h1 {
-  font-size: 2.5rem;
-  color: var(--accent-color);
-  letter-spacing: 1.5px;
+  font-size:2.5rem;
+  color:var(--accent-color);
+  letter-spacing:1.5px;
 }
+
 button {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: var(--accent-color);
-  color: white;
-  box-shadow: var(--box-shadow);
-  margin: 0.5rem;
+  font-family:'Poppins',sans-serif;
+  font-weight:500;
+  padding:1rem 2rem;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  background:var(--accent-color);
+  color:white;
+  box-shadow:var(--box-shadow);
+  margin:0.5rem;
 }
 button:hover {
-  background: var(--button-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255,82,82,0.4);
-}
-.hidden {
-  display: none !important;
+  background:var(--button-hover);
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(255,82,82,0.4);
 }
 
-/* Center the scenario buttons */
+.hidden { display:none !important; }
+
+/* Center scenario buttons */
 .scenario-buttons-wrapper {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  display:flex;justify-content:center;flex-wrap:wrap;gap:1rem;
+  margin-bottom:2rem;
 }
 
-/* Car Selection */
+/* Car grid */
 .car-options-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin: 2rem 0;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:2rem;margin:2rem 0;
 }
-.car-option img {
-  width: 100%;
-  max-width: 200px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
+.car-option img { width:100%;max-width:200px;display:block;margin:0 auto; }
 
-/* Salary Role Selection */
+/* Salary Role */
 #salary-role-selection {
-  margin: 2rem 0;
-  padding: 1rem;
-  background: var(--card-bg);
-  border-radius: var(--border-radius);
+  margin:2rem 0;padding:1rem;
+  background:var(--card-bg);
+  border-radius:var(--border-radius);
 }
-#salary-role-selection p {
-  margin-bottom: 1rem;
-}
+#salary-role-selection p { margin-bottom:1rem; }
 
-/* Back Buttons */
+/* Back button */
 .back-button {
-  margin-top: 2rem;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background:rgba(255,255,255,0.1) !important;
 }
 
-/* Negotiation Screen */
-.negotiation-container {
-  max-width: 800px;
-  margin: 0 auto;
-}
+/* Negotiation */
+.negotiation-container { max-width:800px;margin:0 auto; }
 .negotiation-car-img {
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto 1rem;
-  border-radius: var(--border-radius);
+  width:100%;max-width:300px;
+  margin:0 auto 1rem;
+  border-radius:var(--border-radius);
 }
-#seller-bubble {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  position: relative;
-}
-.seller-avatar img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 1.5rem;
-}
-#seller-bubble::before {
-  content: '';
-  position: absolute;
-  left: -15px;
-  top: 40px;
-  width: 0;
-  height: 0;
-  border: 15px solid transparent;
-  border-right-color: rgba(255, 255, 255, 0.9);
-  border-left: 0;
-  border-top: 0;
+#seller-bubble,#player-bubble {
+  position:relative;
+  padding:1.5rem;
+  border-radius:var(--border-radius);
+  background:rgba(255,255,255,0.9);
+  color:var(--primary-color);
 }
 #player-bubble {
-  position: relative;
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  background: var(--accent-color);
-  margin-top: 1rem;
-}
-#player-bubble::before {
-  content: '';
-  position: absolute;
-  right: -15px;
-  top: 20px;
-  width: 0;
-  height: 0;
-  border: 15px solid transparent;
-  border-left-color: var(--accent-color);
-  border-right: 0;
-  border-top: 0;
-}
-#offer-input {
-  padding: 1rem;
-  border: 2px solid var(--accent-color);
-  border-radius: 50px;
-  background: transparent;
-  color: white;
-  font-size: 1.1rem;
-  margin-right: 1rem;
-  width: 100%;
-  max-width: 300px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-#offer-input:focus {
-  outline: none;
-  border-color: var(--button-hover);
-  box-shadow: 0 0 8px rgba(255,82,82,0.5);
+  background:var(--accent-color);
+  color:#fff;
 }
 .offer-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-/* Bonus Question Styles */
-#bonus-question {
-  background: var(--card-bg);
-  padding: 2rem;
-  border-radius: var(--border-radius);
-  margin: 2rem 0;
-}
-#bonus-options button {
-  display: block;
-  width: 80%;
-  margin: 0.5rem auto;
-}
-#bonus-confirm {
-  margin-top: 1rem;
-}
-
-/* Congratulations Screen */
-#congratulations {
-  background: var(--card-bg);
-  padding: 3rem;
-  border-radius: var(--border-radius);
-  margin: 2rem 0;
-}
-#car-image {
-  width: 100%;
-  max-width: 400px;
-  border-radius: var(--border-radius);
-  margin: 2rem 0;
-  animation: float 3s ease-in-out infinite;
-}
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
-}
-
-/* High Scores */
-#high-scores {
-  background: var(--card-bg);
-  padding: 2rem;
-  border-radius: var(--border-radius);
-  margin: 2rem 0;
-}
-#high-scores-text {
-  font-family: 'Courier New', monospace;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  text-align: left;
-  white-space: pre-wrap;
-}
-.button-group {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
+  display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;
 }
 
 /* Salary-negotiation buttons */
 .salary-button {
-  background: #2A2A2A;
-  color: #fff;
+  background:#2A2A2A;color:#fff;
 }
 .salary-button:hover {
-  background: var(--button-hover);
+  background:var(--button-hover);
 }
 
-/* Bonus question option buttons */
-.option-btn {
-  width: 80%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin: 0.5rem auto;
-  display: block;
-  cursor: pointer;
-  background: #eee;
-  transition: background 0.2s;
+/* Bonus Question */
+#bonus-question {
+  background:var(--card-bg);
+  padding:2rem;
+  border-radius:var(--border-radius);
+  margin:2rem 0;
+  color:var(--text-primary);
 }
-.option-btn:hover { background: #ddd; }
-.option-btn.correct { background: #c8e6c9; }
-.option-btn.wrong   { background: #ffcdd2; }
+#bonus-text { white-space:pre-wrap; }
+.option-btn {
+  background:var(--card-bg);
+  color:var(--text-primary);
+  border:1px solid var(--button-hover);
+  padding:0.75rem 1rem;
+  border-radius:8px;
+  display:block;
+  width:80%;
+  margin:0.5rem auto;
+  transition:background 0.2s;
+}
+.option-btn.correct { background:#4ecdc4; }
+.option-btn.wrong   { background:#ff5252; }
+.option-btn:hover   { background:rgba(255,255,255,0.2); }
+
+/* Congratulations */
+#congratulations {
+  background:var(--card-bg);
+  padding:3rem;
+  border-radius:var(--border-radius);
+  margin:2rem 0;
+}
+#car-image {
+  width:100%;max-width:400px;
+  border-radius:var(--border-radius);
+  margin:2rem 0;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%   {transform:translateY(0);}
+  50%  {transform:translateY(-20px);}
+  100% {transform:translateY(0);}
+}
+
+/* High Scores */
+#high-scores {
+  background:var(--card-bg);
+  padding:2rem;border-radius:var(--border-radius);
+  margin:2rem 0;
+}
+#high-scores-text {
+  font-family:'Courier New',monospace;
+  background:rgba(0,0,0,0.3);
+  padding:1.5rem;
+  border-radius:var(--border-radius);
+  text-align:left;
+  white-space:pre-wrap;
+}
+.button-group {
+  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;
+}

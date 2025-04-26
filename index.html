@@ -1,18 +1,17 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Negotiation Master</title>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 </head>
 <body>
   <div id="game-container">
     <h1>Negotiation Master</h1>
-    
+
     <!-- Initial Screen -->
     <div id="initial-screen">
       <button id="start-button">START GAME</button>
@@ -35,16 +34,13 @@
       <h2>Select Your Dream Car:</h2>
       <div class="car-options-grid">
         <div class="car-option" data-car="new_car">
-          <img src="new_car.png" alt="New Car">
-          <p>New Car</p>
+          <img src="new_car.png" alt="New Car"><p>New Car</p>
         </div>
         <div class="car-option" data-car="old_car">
-          <img src="old_car.png" alt="Old Car">
-          <p>Old Car</p>
+          <img src="old_car.png" alt="Old Car"><p>Old Car</p>
         </div>
         <div class="car-option" data-car="antique">
-          <img src="antique.png" alt="Antique Car">
-          <p>Antique Car</p>
+          <img src="antique.png" alt="Antique Car"><p>Antique Car</p>
         </div>
       </div>
       <button class="back-button" id="back-to-scenarios">Back to Scenarios</button>
@@ -54,8 +50,7 @@
     <div id="salary-role-selection" class="hidden">
       <h2>Salary Negotiation - Choose Your Role</h2>
       <p>
-        Welcome to the Salary Negotiation Game!<br>
-        You will negotiate with a virtual employer to maximize your salary and benefits.<br>
+        Welcome! Negotiate with a virtual employer to maximize your compensation.<br/>
         Choose your role:
       </p>
       <button class="role-button" data-role="high">Better than average employee</button>
@@ -66,21 +61,18 @@
     <!-- Negotiation Screen -->
     <div id="negotiation" class="hidden">
       <div class="negotiation-container">
-        <img id="negotiation-car-image" src="" alt="Negotiation Image" class="negotiation-car-img">
+        <img id="negotiation-car-image" src="" alt="Negotiation Image" class="negotiation-car-img"/>
         <div id="seller-bubble">
           <div class="seller-avatar">
-            <img src="seller.jpg" alt="Negotiator">
+            <img src="seller.jpg" alt="Negotiator"/>
           </div>
           <div class="dialog-content">
             <p id="seller-dialog"></p>
           </div>
         </div>
         <div id="player-bubble">
-          <input type="text" id="offer-input" placeholder="">
-          <div class="offer-buttons">
-            <button id="propose-offer">Propose</button>
-            <button id="accept-offer">Accept</button>
-          </div>
+          <input type="text" id="offer-input" placeholder=""/>
+          <div class="offer-buttons"><!-- populated by JS --></div>
           <div id="ai-options" class="hidden"></div>
           <div id="salary-incentives" class="hidden"></div>
         </div>
@@ -100,7 +92,7 @@
     <div id="congratulations" class="hidden">
       <div class="congrats-content">
         <h2>Negotiation Outcome</h2>
-        <img id="car-image" src="" alt="Outcome Image">
+        <img id="car-image" src="" alt="Outcome Image"/>
         <div id="score-text"></div>
         <div class="button-group">
           <button class="back-button" id="back-to-car-selection-from-congrats">Try Another Deal</button>
