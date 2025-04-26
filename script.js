@@ -34,6 +34,13 @@ let bonusBaseScore = 0;
 let bonusScenarioType = "";
 let bonusFinalValue = 0;
 
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
 const questionPool = [
   {
     q: "What does BATNA stand for?",
@@ -447,15 +454,12 @@ function handleSalaryOffer() {
   const offer = parseFloat(offerIn.value.replace(/,/g, '')) || 0;
   if (!offer) { showInputError(offerIn, 'Enter valid salary'); return; }
 
-  // ... existing salary logic unchanged ...
 }
 
 function requestIncentiveSalary() {
-  // ... existing incentive logic unchanged ...
 }
 
 function walkAwaySalary() {
-  // ... existing walk-away logic unchanged ...
 }
 
 function acceptSalaryOffer() {
@@ -484,47 +488,36 @@ function showBonusQuestion() {
   bonusOpts.innerHTML = '';
   bonusConf.classList.add('hidden');
 
+  // pick a random question
   const q = questionPool[Math.floor(Math.random() * questionPool.length)];
   bonusText.textContent = q.q;
 
-  q.options.forEach((opt, i) => {
-    const b = document.createElement('button');
-    b.className = 'option-btn';
-    b.textContent = opt;
-    b.addEventListener('click', () => {
+  // build array of { text, index } then shuffle it
+  const opts = q.options.map((opt, idx) => ({ text: opt, idx }));
+  shuffleArray(opts);
+
+  // render buttons in shuffled order
+  opts.forEach(({ text, idx }) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = text;
+    btn.style.whiteSpace = 'normal';      // ensure wrap
+    btn.addEventListener('click', () => {
+      // disable all
       document.querySelectorAll('.option-btn').forEach(x => x.disabled = true);
+
       let finalScore = bonusBaseScore;
-      if (i === q.correctIndex) {
+      if (idx === q.correctIndex) {
         finalScore = Math.round(bonusBaseScore * 1.2);
         bonusText.textContent += `\n\n✅ Correct! ${q.correctAnswerText}\nFinal Score: ${finalScore}%`;
+        btn.classList.add('correct');
       } else {
         bonusText.textContent += `\n\n❌ Wrong. ${q.correctAnswerText}\nFinal Score: ${finalScore}%`;
+        btn.classList.add('wrong');
       }
-
-      // Update high-scores
-      if (bonusScenarioType === 'buy-car') {
-        if (finalScore > highScores["Buy a Car"][currentCar]) {
-          highScores["Buy a Car"][currentCar] = finalScore;
-        }
-      } else if (bonusScenarioType === 'rogue-ai') {
-        if (finalScore > highScores["Rogue AI Negotiation"]) {
-          highScores["Rogue AI Negotiation"] = finalScore;
-        }
-      } else {
-        if (finalScore > highScores["Salary Negotiation"]) {
-          highScores["Salary Negotiation"] = finalScore;
-        }
-      }
-      saveHighScores();
-
-      scoreEl.textContent = `Your total score: ${finalScore}%`;
-      if (bonusScenarioType === 'buy-car') congratsImg.src = `${currentCar}.png`;
-      else if (bonusScenarioType === 'rogue-ai') congratsImg.src = "exo9.png";
-      else congratsImg.src = "seller.jpg";
-
       bonusConf.classList.remove('hidden');
     });
-    bonusOpts.appendChild(b);
+    bonusOpts.appendChild(btn);
   });
 }
 bonusConf.addEventListener('click', () => switchScreen('congrats'));
@@ -544,7 +537,6 @@ function renderHighScores() {
 }
 
 function showResetConfirmation() {
-  // ... existing reset logic unchanged ...
 }
 
 // ----------------------------
