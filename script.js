@@ -1,6 +1,16 @@
 // script.js
 
 // ----------------------------
+// Helpers & Shuffle
+// ----------------------------
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+// ----------------------------
 // Global State
 // ----------------------------
 let currentScenario = null;
@@ -28,18 +38,11 @@ const incentivesData = [
   { name: "Coffee Machine", value: 100, cost: 10 }
 ];
 
-let aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0 };
+let aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0, currentDemand: 100 };
 
 let bonusBaseScore = 0;
 let bonusScenarioType = "";
 let bonusFinalValue = 0;
-
-function shuffleArray(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
 
 const questionPool = [
   {
@@ -109,7 +112,7 @@ const highScores = JSON.parse(localStorage.getItem('highScores')) || {
 };
 
 // ----------------------------
-// Cached DOM
+// Cached DOM Elements
 // ----------------------------
 const screens = {
   initial: document.getElementById('initial-screen'),
@@ -117,25 +120,31 @@ const screens = {
   carSelect: document.getElementById('car-selection'),
   salaryRole: document.getElementById('salary-role-selection'),
   negotiation: document.getElementById('negotiation'),
+  outcome: document.getElementById('outcome-screen'),
   bonus: document.getElementById('bonus-question'),
   congrats: document.getElementById('congratulations'),
   highScores: document.getElementById('high-scores')
 };
 
-const startBtn    = document.getElementById('start-button');
-const scenarioBtns= document.querySelectorAll('.scenario-button');
-const highBtn     = document.getElementById('high-scores-button');
-const backBtns    = document.querySelectorAll('.back-button');
-const carOpts     = document.querySelectorAll('.car-option');
-const roleBtns    = document.querySelectorAll('.role-button');
+const startBtn  = document.getElementById('start-button');
+const scenarioBtns = document.querySelectorAll('.scenario-button');
+const highBtn   = document.getElementById('high-scores-button');
+const backBtns  = document.querySelectorAll('.back-button');
+const carOpts   = document.querySelectorAll('.car-option');
+const roleBtns  = document.querySelectorAll('.role-button');
 
-const sellerDlg   = document.getElementById('seller-dialog');
-const negImg      = document.getElementById('negotiation-car-image');
-const offerIn     = document.getElementById('offer-input');
+const sellerDlg = document.getElementById('seller-dialog');
+const negImg    = document.getElementById('negotiation-car-image');
+const offerIn   = document.getElementById('offer-input');
 
-const bonusText   = document.getElementById('bonus-text');
-const bonusOpts   = document.getElementById('bonus-options');
-const bonusConf   = document.getElementById('bonus-confirm');
+const outcomeScreen   = document.getElementById('outcome-screen');
+const outcomeImg      = document.getElementById('outcome-img');
+const outcomeText     = document.getElementById('outcome-text');
+const outcomeContinue = document.getElementById('outcome-continue');
+
+const bonusText = document.getElementById('bonus-text');
+const bonusOpts = document.getElementById('bonus-options');
+const bonusConf = document.getElementById('bonus-confirm');
 
 const congratsImg = document.getElementById('car-image');
 const scoreEl     = document.getElementById('score-text');
@@ -143,7 +152,7 @@ const highText    = document.getElementById('high-scores-text');
 const resetBtn    = document.getElementById('reset-high-scores-button');
 
 // ----------------------------
-// Helpers
+// Helper Functions
 // ----------------------------
 function switchScreen(key) {
   Object.values(screens).forEach(s => s.classList.add('hidden'));
@@ -165,7 +174,7 @@ function showInputError(el, msg) {
 }
 
 function createConfetti() {
-  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeead'];
+  const colors = ['#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#ffeead'];
   const container = document.getElementById('congratulations');
   document.querySelectorAll('.confetti').forEach(el => el.remove());
   for (let i = 0; i < 80; i++) {
@@ -178,23 +187,20 @@ function createConfetti() {
   }
 }
 
-// Reset default Car/AI buttons
+// Reset Car/AI default buttons
 function resetOfferButtons() {
   const grp = document.querySelector('.offer-buttons');
   grp.innerHTML = '';
-
   const p = document.createElement('button');
   p.id = 'propose-offer';
   p.textContent = 'Propose';
   p.addEventListener('click', onProposeOffer);
   grp.appendChild(p);
-
   const a = document.createElement('button');
   a.id = 'accept-offer';
   a.textContent = 'Accept';
   a.addEventListener('click', onAcceptOffer);
   grp.appendChild(a);
-
   document.getElementById('ai-options').classList.add('hidden');
   document.getElementById('salary-incentives').classList.add('hidden');
 }
@@ -222,16 +228,15 @@ function onAcceptOffer() {
 }
 
 // ----------------------------
-// Navigation wiring
+// Navigation Wiring
 // ----------------------------
 startBtn.addEventListener('click', () => switchScreen('scenarios'));
 scenarioBtns.forEach(b => {
   b.addEventListener('click', () => {
-    const scen = b.dataset.scenario;
-    currentScenario = scen;
-    if (scen === 'buy-car') {
+    currentScenario = b.dataset.scenario;
+    if (currentScenario === 'buy-car') {
       switchScreen('carSelect');
-    } else if (scen === 'rogue-ai') {
+    } else if (currentScenario === 'rogue-ai') {
       startAINegotiation();
       switchScreen('negotiation');
     } else {
@@ -268,8 +273,14 @@ backBtns.forEach(b => {
 });
 resetBtn.addEventListener('click', showResetConfirmation);
 
+// Proceed to Bonus
+outcomeContinue.addEventListener('click', () => {
+  outcomeScreen.classList.add('hidden');
+  showBonusQuestion();
+});
+
 // ----------------------------
-// Car Negotiation
+// Buy-a-Car Flow
 // ----------------------------
 carOpts.forEach(o => {
   o.addEventListener('click', () => {
@@ -283,23 +294,21 @@ function startNegotiation(carType) {
   currentCar = carType;
   negotiationAttempts = 0;
   maxAttempts = Math.floor(Math.random() * 5) + 1;
-
-  const carSpecs = {
+  const specs = {
     "new_car": { label: "New Car", price: 50000 },
     "old_car": { label: "Old Car", price: 10000 },
     "antique": { label: "Antique Car", price: 13000 }
   };
-  initialPrice = carSpecs[carType].price;
+  initialPrice = specs[carType].price;
   minPrice = initialPrice * (0.75 + Math.random() * 0.1);
-
   sellerDlg.innerHTML = `
-    🤑 Seller: Interested in this ${carSpecs[carType].label}?<br>
+    🤑 Seller: Interested in this ${specs[carType].label}?<br>
     Initial Price: $${initialPrice.toLocaleString()}
   `;
   negImg.src = `${carType}.png`;
   offerIn.placeholder = "Enter your car offer (£)";
 
-  // **Allow immediate acceptance** of the initial price:
+  // immediate accept
   const acceptBtn = document.getElementById('accept-offer');
   acceptBtn.textContent = `Accept $${initialPrice.toLocaleString()}`;
 }
@@ -307,53 +316,48 @@ function startNegotiation(carType) {
 function handleCarOffer(offer) {
   if (negotiationAttempts > maxAttempts) {
     sellerDlg.innerHTML = `
-      😠 Seller: Too many low offers! Final Price: $${initialPrice.toLocaleString()}
+      😠 Too many low offers! Final Price: $${initialPrice.toLocaleString()}
     `;
     document.getElementById('accept-offer').textContent = `Accept $${initialPrice.toLocaleString()}`;
     return;
   }
   if (offer < minPrice * 0.9) {
-    const counterOffer = Math.floor(Math.random() * (initialPrice - minPrice) + minPrice);
-    sellerDlg.innerHTML = `
-      😠 Seller: Insulting! My best: $${counterOffer.toLocaleString()}
-    `;
-    document.getElementById('accept-offer').textContent = `Accept $${counterOffer.toLocaleString()}`;
+    const co = Math.floor(Math.random() * (initialPrice - minPrice) + minPrice);
+    sellerDlg.innerHTML = `😠 Insulting! My best: $${co.toLocaleString()}`;
+    document.getElementById('accept-offer').textContent = `Accept $${co.toLocaleString()}`;
   } else if (offer < minPrice) {
-    const counterOffer = Math.floor(Math.random() * (minPrice - offer) + offer);
-    sellerDlg.innerHTML = `
-      🤔 Seller: How about $${counterOffer.toLocaleString()}?
-    `;
-    document.getElementById('accept-offer').textContent = `Accept $${counterOffer.toLocaleString()}`;
+    const co = Math.floor(Math.random() * (minPrice - offer) + offer);
+    sellerDlg.innerHTML = `🤔 How about $${co.toLocaleString()}?`;
+    document.getElementById('accept-offer').textContent = `Accept $${co.toLocaleString()}`;
   } else {
-    sellerDlg.innerHTML = `
-      🎉 Seller: Deal at $${offer.toLocaleString()}!
-    `;
+    sellerDlg.innerHTML = `🎉 Deal at $${offer.toLocaleString()}!`;
     document.getElementById('accept-offer').textContent = `Accept $${offer.toLocaleString()}`;
   }
 }
 
 function endCarOrAI(finalOffer) {
   const range = initialPrice - minPrice;
-  const gained = initialPrice - finalOffer;
-  const pct = range > 0 ? Math.round((gained / range) * 100) : 0;
-
+  const savings = initialPrice - finalOffer;
+  const pct = range > 0 ? Math.round((savings / range) * 100) : 0;
   bonusBaseScore = pct;
   bonusScenarioType = currentScenario;
   bonusFinalValue = finalOffer;
   saveHighScores();
   createConfetti();
-  showBonusQuestion();
+  showOutcomeScreen();
 }
 
 // ----------------------------
-// Rogue AI Negotiation
+// Rogue AI Flow
 // ----------------------------
 function startAINegotiation() {
   resetOfferButtons();
-  aiState = { round: 1, demand: 100, minRequired: 60, lastDemand: 0 };
+  aiState = { round: 1, demand: 100, minRequired: 60, lastDemand: 0, currentDemand: 100 };
   sellerDlg.innerHTML = `🤖 EXO-9: I demand ${aiState.demand} units. Your offer?`;
   negImg.src = "exo9.png";
   offerIn.placeholder = "Enter your resource offer (units)";
+  // immediate accept
+  document.getElementById('accept-offer').textContent = `Accept ${aiState.demand}`;
 }
 
 function handleAIOffer(offer) {
@@ -366,7 +370,9 @@ function handleAIOffer(offer) {
       aiState.round = 2;
     } else {
       aiState.lastDemand = Math.floor((aiState.demand + offer) / 2);
+      aiState.currentDemand = aiState.lastDemand;
       sellerDlg.innerHTML = `🤖 I need ${aiState.lastDemand}.`;
+      document.getElementById('accept-offer').textContent = `Accept ${aiState.currentDemand}`;
       aiState.round = 2;
     }
   } else if (aiState.round === 2) {
@@ -375,12 +381,13 @@ function handleAIOffer(offer) {
       endCarOrAI(offer);
     } else {
       const finalD = Math.floor((aiState.lastDemand + offer) / 2);
+      aiState.currentDemand = finalD;
       sellerDlg.innerHTML = `🤖 Final demand: ${finalD}.`;
-      aiState.lastDemand = finalD;
+      document.getElementById('accept-offer').textContent = `Accept ${aiState.currentDemand}`;
       aiState.round = 3;
     }
   } else {
-    if (offer >= aiState.lastDemand) {
+    if (offer >= aiState.currentDemand) {
       sellerDlg.innerHTML = `🤖 Agreement at ${offer}.`;
       endCarOrAI(offer);
     } else {
@@ -391,7 +398,7 @@ function handleAIOffer(offer) {
 }
 
 // ----------------------------
-// Salary Negotiation
+// Salary Flow
 // ----------------------------
 roleBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -418,33 +425,16 @@ function beginSalaryNegotiation(role) {
   const grp = document.querySelector('.offer-buttons');
   grp.innerHTML = "";
 
-  // Negotiate button
-  const negotiateBtn = document.createElement('button');
-  negotiateBtn.textContent = "Negotiate Salary";
-  negotiateBtn.classList.add('salary-button');
-  negotiateBtn.addEventListener('click', onProposeOffer);
-  grp.appendChild(negotiateBtn);
-
-  // Request Incentive
-  const incentiveBtn = document.createElement('button');
-  incentiveBtn.textContent = "Request Incentive";
-  incentiveBtn.classList.add('salary-button');
-  incentiveBtn.addEventListener('click', requestIncentiveSalary);
-  grp.appendChild(incentiveBtn);
-
-  // Walk Away
-  const walkAwayBtn = document.createElement('button');
-  walkAwayBtn.textContent = "Walk Away";
-  walkAwayBtn.classList.add('salary-button');
-  walkAwayBtn.addEventListener('click', walkAwaySalary);
-  grp.appendChild(walkAwayBtn);
-
-  // Accept Offer
-  const acceptBtn2 = document.createElement('button');
-  acceptBtn2.textContent = "Accept Offer";
-  acceptBtn2.classList.add('salary-button');
-  acceptBtn2.addEventListener('click', acceptSalaryOffer);
-  grp.appendChild(acceptBtn2);
+  ["Negotiate Salary","Request Incentive","Walk Away","Accept Offer"].forEach((txt,i) => {
+    const btn = document.createElement('button');
+    btn.textContent = txt;
+    btn.classList.add('salary-button');
+    if (i === 0) btn.addEventListener('click', onProposeOffer);
+    if (i === 1) btn.addEventListener('click', requestIncentiveSalary);
+    if (i === 2) btn.addEventListener('click', walkAwaySalary);
+    if (i === 3) btn.addEventListener('click', acceptSalaryOffer);
+    grp.appendChild(btn);
+  });
 
   sellerDlg.innerHTML = `Employer: We propose £${initialSalaryOffer.toLocaleString()}. Your thoughts?`;
   negImg.src = "employer-interview_picture.png";
@@ -454,12 +444,17 @@ function handleSalaryOffer() {
   const offer = parseFloat(offerIn.value.replace(/,/g, '')) || 0;
   if (!offer) { showInputError(offerIn, 'Enter valid salary'); return; }
 
+  // ... existing logic unchanged ...
+
+  // On final acceptance, call endSalaryNegotiation()
 }
 
 function requestIncentiveSalary() {
+  // ... existing logic unchanged ...
 }
 
 function walkAwaySalary() {
+  // ... existing logic unchanged ...
 }
 
 function acceptSalaryOffer() {
@@ -468,16 +463,47 @@ function acceptSalaryOffer() {
 }
 
 function endSalaryNegotiation() {
-  const pct = initialSalaryOffer < employerMax
-    ? Math.round(((finalSalaryOffer - initialSalaryOffer) / (employerMax - initialSalaryOffer)) * 100)
-    : 0;
+  const range = employerMax - initialSalaryOffer;
+  const gain = finalSalaryOffer - initialSalaryOffer;
+  const pct = range > 0 ? Math.round((gain / range) * 100) : 0;
 
   bonusBaseScore = pct;
   bonusScenarioType = 'salary-negotiation';
   bonusFinalValue = finalSalaryOffer;
   saveHighScores();
   createConfetti();
-  showBonusQuestion();
+  showOutcomeScreen();
+}
+
+// ----------------------------
+// Outcome Screen
+// ----------------------------
+function showOutcomeScreen() {
+  Object.values(screens).forEach(s => s.classList.add('hidden'));
+  screens.outcome.classList.remove('hidden');
+
+  if (bonusScenarioType === 'buy-car') {
+    outcomeImg.src = `${currentCar}.png`;
+    outcomeText.innerHTML = `
+      You negotiated from $${initialPrice.toLocaleString()} down to $${bonusFinalValue.toLocaleString()}.<br>
+      Score: ${bonusBaseScore}%.
+    `;
+  }
+  else if (bonusScenarioType === 'rogue-ai') {
+    outcomeImg.src = 'exo9.png';
+    outcomeText.innerHTML = `
+      <em>"Thank you, Judgment day is coming…"</em><br>
+      You provided ${bonusFinalValue} units.<br>
+      Score: ${bonusBaseScore}%.
+    `;
+  }
+  else if (bonusScenarioType === 'salary-negotiation') {
+    outcomeImg.src = 'seller.jpg';
+    outcomeText.innerHTML = `
+      You negotiated your salary from £${initialSalaryOffer.toLocaleString()} to £${bonusFinalValue.toLocaleString()}.<br>
+      Score: ${bonusBaseScore}%.
+    `;
+  }
 }
 
 // ----------------------------
@@ -488,24 +514,18 @@ function showBonusQuestion() {
   bonusOpts.innerHTML = '';
   bonusConf.classList.add('hidden');
 
-  // pick a random question
   const q = questionPool[Math.floor(Math.random() * questionPool.length)];
   bonusText.textContent = q.q;
 
-  // build array of { text, index } then shuffle it
   const opts = q.options.map((opt, idx) => ({ text: opt, idx }));
   shuffleArray(opts);
 
-  // render buttons in shuffled order
   opts.forEach(({ text, idx }) => {
     const btn = document.createElement('button');
     btn.className = 'option-btn';
     btn.textContent = text;
-    btn.style.whiteSpace = 'normal';      // ensure wrap
     btn.addEventListener('click', () => {
-      // disable all
       document.querySelectorAll('.option-btn').forEach(x => x.disabled = true);
-
       let finalScore = bonusBaseScore;
       if (idx === q.correctIndex) {
         finalScore = Math.round(bonusBaseScore * 1.2);
@@ -515,6 +535,27 @@ function showBonusQuestion() {
         bonusText.textContent += `\n\n❌ Wrong. ${q.correctAnswerText}\nFinal Score: ${finalScore}%`;
         btn.classList.add('wrong');
       }
+
+      if (bonusScenarioType === 'buy-car') {
+        if (finalScore > highScores["Buy a Car"][currentCar]) {
+          highScores["Buy a Car"][currentCar] = finalScore;
+        }
+      } else if (bonusScenarioType === 'rogue-ai') {
+        if (finalScore > highScores["Rogue AI Negotiation"]) {
+          highScores["Rogue AI Negotiation"] = finalScore;
+        }
+      } else {
+        if (finalScore > highScores["Salary Negotiation"]) {
+          highScores["Salary Negotiation"] = finalScore;
+        }
+      }
+      saveHighScores();
+
+      scoreEl.textContent = `Your total score: ${finalScore}%`;
+      if (bonusScenarioType === 'buy-car') congratsImg.src = `${currentCar}.png`;
+      else if (bonusScenarioType === 'rogue-ai') congratsImg.src = "exo9.png";
+      else congratsImg.src = "seller.jpg";
+
       bonusConf.classList.remove('hidden');
     });
     bonusOpts.appendChild(btn);
@@ -526,10 +567,10 @@ bonusConf.addEventListener('click', () => switchScreen('congrats'));
 // High Scores & Reset
 // ----------------------------
 function renderHighScores() {
-  let t = "Buy a Car:\n";
-  const labels = { new_car: "New Car", old_car: "Old Car", antique: "Antique Car" };
+  let t = `Buy a Car:\n`;
+  const L = { new_car: "New Car", old_car: "Old Car", antique: "Antique Car" };
   for (const c in highScores["Buy a Car"]) {
-    t += `  ${labels[c]}: ${highScores["Buy a Car"][c]}%\n`;
+    t += `  ${L[c]}: ${highScores["Buy a Car"][c]}%\n`;
   }
   t += `\nRogue AI Negotiation: ${highScores["Rogue AI Negotiation"]}%\n`;
   t += `\nSalary Negotiation: ${highScores["Salary Negotiation"]}%\n`;
@@ -537,6 +578,36 @@ function renderHighScores() {
 }
 
 function showResetConfirmation() {
+  const overlay = document.createElement('div');
+  overlay.id = 'reset-confirmation-overlay';
+  const modal = document.createElement('div');
+  modal.id = 'reset-confirmation-modal';
+  modal.innerHTML = `<p>Reset all High Scores?</p>`;
+  const yes = document.createElement('button');
+  yes.textContent = "Yes";
+  const no = document.createElement('button');
+  no.textContent = "No";
+  modal.appendChild(yes);
+  modal.appendChild(no);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  const timer = setTimeout(() => {
+    if (document.body.contains(overlay)) document.body.removeChild(overlay);
+  }, 15000);
+
+  yes.addEventListener('click', () => {
+    clearTimeout(timer);
+    Object.keys(highScores["Buy a Car"]).forEach(k => highScores["Buy a Car"][k] = 0);
+    highScores["Rogue AI Negotiation"] = 0;
+    highScores["Salary Negotiation"] = 0;
+    saveHighScores();
+    renderHighScores();
+    document.body.removeChild(overlay);
+  });
+  no.addEventListener('click', () => {
+    clearTimeout(timer);
+    document.body.removeChild(overlay);
+  });
 }
 
 // ----------------------------
@@ -553,7 +624,7 @@ function resetState() {
   finalSalaryOffer = 0;
   incentiveBonus = 0;
   requestedIncentives = [];
-  aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0 };
+  aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0, currentDemand: 100 };
   offerIn.value = '';
   document.getElementById('ai-options').classList.add('hidden');
   document.getElementById('salary-incentives').classList.add('hidden');

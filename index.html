@@ -72,12 +72,20 @@
         </div>
         <div id="player-bubble">
           <input type="text" id="offer-input" placeholder=""/>
-          <div class="offer-buttons"><!-- populated by JS --></div>
+          <div class="offer-buttons"></div>
           <div id="ai-options" class="hidden"></div>
           <div id="salary-incentives" class="hidden"></div>
         </div>
       </div>
       <button class="back-button" id="back-to-car-selection">Back</button>
+    </div>
+
+    <!-- Outcome Screen -->
+    <div id="outcome-screen" class="hidden">
+      <h2>Negotiation Result</h2>
+      <img id="outcome-img" src="" alt="Outcome Image" class="outcome-img"/>
+      <div id="outcome-text"></div>
+      <button id="outcome-continue">Proceed to Bonus</button>
     </div>
 
     <!-- Bonus Question Screen -->
@@ -109,7 +117,6 @@
       <button class="back-button" id="back-to-scenarios-from-high-scores">Back to Scenarios</button>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
