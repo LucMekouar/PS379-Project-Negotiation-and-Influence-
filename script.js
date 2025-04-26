@@ -356,10 +356,9 @@ function handleCarOffer(offer) {
 
 function endNegotiation(finalValue) {
   const range = initialPrice - minPrice;
-  const saved = initialPrice - finalValue;
-  bonusBaseScore = range > 0 ? Math.round((saved / range) * 100) : 0;
+  bonusBaseScore  = range > 0 ? Math.round((initialPrice - finalValue) / range * 100) : 0;
   bonusScenarioType = currentScenario;
-  bonusFinalValue = finalValue;
+  bonusFinalValue   = finalValue;
   renderOutcomeScreen(finalValue);
 }
 
@@ -377,27 +376,33 @@ function startAINegotiation() {
 }
 
 function handleAIOffer(offer) {
+  const acceptBtn = document.getElementById('accept-offer');
   if (aiState.round === 1) {
     if (offer >= aiState.demand) {
       sellerDlg.innerHTML = `🤖 EXO-9: Agreement at ${offer} units.`;
       endNegotiation(offer);
+      return;
     } else if (offer < aiState.minRequired) {
       sellerDlg.innerHTML = `🤖 EXO-9: Insufficient. ≥${aiState.minRequired} required.`;
       aiState.round = 2;
+      acceptBtn.textContent = `Accept ${aiState.minRequired} units`;
     } else {
       aiState.lastDemand = Math.floor((aiState.demand + offer) / 2);
       sellerDlg.innerHTML = `🤖 EXO-9: I need ${aiState.lastDemand} units.`;
       aiState.round = 2;
+      acceptBtn.textContent = `Accept ${aiState.lastDemand} units`;
     }
   } else if (aiState.round === 2) {
     if (offer >= aiState.lastDemand) {
       sellerDlg.innerHTML = `🤖 EXO-9: Deal at ${offer} units.`;
       endNegotiation(offer);
+      return;
     } else {
       const next = Math.floor((aiState.lastDemand + offer) / 2);
       sellerDlg.innerHTML = `🤖 EXO-9: Final demand: ${next} units.`;
       aiState.lastDemand = next;
       aiState.round = 3;
+      acceptBtn.textContent = `Accept ${next} units`;
     }
   } else {
     if (offer >= aiState.lastDemand) {
@@ -529,13 +534,13 @@ function requestIncentiveSalary() {
       if (rand < 0.4 && employerRemaining >= cost) {
         requestedIncentives.push(`${incentive.name} (Full)`);
         incentiveBonus += value; employerRemaining -= cost;
-        sellerDlg.innerHTML = `Employer: ${incentive.name} approved full.`;
+        sellerDlg.innerHTML = `Employer: ${incentive.name} approved full.`;  
       } else if (rand < 0.7 && employerRemaining >= cost/2) {
         requestedIncentives.push(`${incentive.name} (Partial)`);
         incentiveBonus += Math.floor(value*0.5); employerRemaining -= Math.floor(cost/2);
-        sellerDlg.innerHTML = `Employer: ${incentive.name} approved partial.`;
+        sellerDlg.innerHTML = `Employer: ${incentive.name} approved partial.`;  
       } else {
-        sellerDlg.innerHTML = `Employer: ${incentive.name} cannot be accommodated.`;
+        sellerDlg.innerHTML = `Employer: ${incentive.name} cannot be accommodated.`;  
       }
       div.innerHTML = ''; div.classList.add('hidden');
       incentiveRequestsCount++;
@@ -585,7 +590,7 @@ function renderOutcomeScreen(finalValue) {
     outcomeText.textContent = "Thank you, Judgement day is coming...";
   }
   else {
-    outcomeImg.src = 'seller.jpg';
+    outcomeImg.src = 'employer-interview_picture.png';
     outcomeText.innerHTML = `
       Agreement reached! You secured a salary of £${finalValue.toLocaleString()} 
       as a ${salaryRole === 'high' ? 'better-than-average' : 'average'} employee.`;
@@ -643,7 +648,7 @@ function showBonusQuestion() {
       }
       saveHighScores();
 
-      // Display final score and branch high score
+      // Display final score and branch high score in congrats
       let branchHigh;
       if (bonusScenarioType === 'buy-car') {
         branchHigh = highScores["Buy a Car"][currentCar];
@@ -654,6 +659,14 @@ function showBonusQuestion() {
       }
       scoreTextEl.textContent = 
         `Your total score: ${finalScore}%\nHigh Score: ${branchHigh}%`;
+
+      // Set congrats image per scenario
+      congratsImg.src = bonusScenarioType === 'rogue-ai'
+        ? 'exo9.png'
+        : (bonusScenarioType === 'buy-car'
+           ? `${currentCar}.png`
+           : 'employer-interview_picture.png'
+          );
 
       bonusConfBtn.classList.remove('hidden');
     });
