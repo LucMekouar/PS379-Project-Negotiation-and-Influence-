@@ -40,6 +40,7 @@ let aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0 };
 let bonusBaseScore = 0;
 let bonusScenarioType = "";
 let bonusFinalValue = 0;
+let bonusFinalScore = 0;         // ← new
 
 // Pool of questions
 const questionPool = [
@@ -182,7 +183,7 @@ function showTemporaryMessage(message, duration = 2000) {
 }
 
 function createConfetti() {
-  const colors = ['#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#ffeead'];
+  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeead'];
   const container = document.getElementById('congratulations');
   document.querySelectorAll('.confetti').forEach(el => el.remove());
   for (let i = 0; i < 100; i++) {
@@ -325,6 +326,7 @@ function startCarNegotiation(carType) {
   `;
   negImg.src = `${carType}.png`;
   offerIn.placeholder = "Enter your car offer (£)";
+  // Immediate accept
   document.getElementById('accept-offer').textContent =
     `Accept $${initialPrice.toLocaleString()}`;
 }
@@ -652,6 +654,7 @@ function showBonusQuestion() {
         bonusTextEl.textContent += `\n\n❌ Wrong. ${q.correctAnswerText}\nFinal Score: ${finalScore}%`;
         btn.classList.add('wrong');
       }
+      bonusFinalScore = finalScore;  // ← store for congrats screen
       if (bonusScenarioType==='buy-car' && finalScore>highScores["Buy a Car"][currentCar]) {
         highScores["Buy a Car"][currentCar]=finalScore;
       } else if (bonusScenarioType==='rogue-ai' && finalScore>highScores["Rogue AI Negotiation"]) {
@@ -666,7 +669,21 @@ function showBonusQuestion() {
   });
 }
 
-bonusConfBtn.addEventListener('click', ()=>switchScreen('congrats'));
+// ---- FIX: Populate Congratulations Screen ----
+bonusConfBtn.addEventListener('click', () => {
+  // set image and score text on final screen
+  if (bonusScenarioType === 'buy-car') {
+    congratsImg.src = `${currentCar}.png`;
+    scoreTextEl.innerHTML = `Your total score: ${bonusFinalScore}%`;
+  } else if (bonusScenarioType === 'rogue-ai') {
+    congratsImg.src = 'exo9.png';
+    scoreTextEl.innerHTML = `Your total score: ${bonusFinalScore}%`;
+  } else {
+    congratsImg.src = 'seller.jpg';
+    scoreTextEl.innerHTML = `Your total score: ${bonusFinalScore}%`;
+  }
+  switchScreen('congrats');
+});
 
 // ----------------------------
 // High Scores & Reset
