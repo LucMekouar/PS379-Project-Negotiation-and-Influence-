@@ -1,574 +1,815 @@
-// Game state variables and question pool
-let currentScenario = null;
-let scenarioState = {};  // to hold scenario-specific values (rounds, counters, etc.)
+// script.js
+
+// ----------------------------
+// Dynamic Accent Color
+// ----------------------------
+document.documentElement.style.setProperty('--accent-color', '#FF6B6B');
+
+// ----------------------------
+// Global Game State
+// ----------------------------
+let currentCar = null;
+let currentScenario = null;       // 'buy-car', 'rogue-ai', 'salary-negotiation'
+let initialPrice = 0;
+let minPrice = 0;
+let agreedPrice = null;
+let negotiationAttempts = 0;
+let maxAttempts = 5;
+
+// Salary negotiation state
+let salaryRole = "";              // "high" or "low"
+let initialSalaryOffer = 0;
+let employerMax = 0;
+let employerRemaining = 0;
+let finalSalaryOffer = 0;
+let incentiveBonus = 0;
+let requestedIncentives = [];
+let incentiveRequestsCount = 0;
+const maxIncentives = 4;
+const incentivesData = [
+  { name: "Signing Bonus", value: 2000, cost: 3000 },
+  { name: "Flexible Working Hours", valuePercent: 10, costPercent: 7.5 },
+  { name: "Professional Development", value: 500, cost: 1000 },
+  { name: "Gym Access", value: 150, cost: 100 },
+  { name: "Coffee Machine", value: 100, cost: 10 }
+];
+
+// Rogue AI negotiation state (new offer-based flow)
+let aiState = {
+  round: 0,
+  demand: 100,
+  minRequired: 60,
+  lastDemand: 0
+};
+
+// High Scores stored in localStorage
+const highScores = JSON.parse(localStorage.getItem('highScores')) || {
+  "Buy a Car": { "new_car": 0, "old_car": 0, "antique": 0 },
+  "Rogue AI Negotiation": 0,
+  "Salary Negotiation": 0
+};
+
+// ----------------------------
+// Bonus Question State
+// ----------------------------
+let bonusBaseScore = 0;
+let bonusScenarioType = "";   // 'buy-car', 'rogue-ai', 'salary-negotiation'
+let bonusFinalValue = 0;
+
+// Pool of 5 moderately challenging negotiation questions
 const questionPool = [
   {
-    q: "What does BATNA refer to in negotiation?",
+    q: "What does BATNA stand for?",
     options: [
       "Best Alternative to a Negotiated Agreement",
       "Basic Agreement on Negotiation Analysis",
       "Bold Attempt to Negotiate Aggressively",
-      "Best Action taking No Agreement"
+      "Business Action for Negotiation Advantage"
     ],
     correctIndex: 0,
-    correctAnswerText: "BATNA stands for Best Alternative to a Negotiated Agreement, your fallback if negotiations fail."
+    correctAnswerText: "BATNA = Best Alternative to a Negotiated Agreement, your fallback if talks break down."
   },
   {
-    q: "In negotiation, the ZOPA is best described as:",
+    q: "In negotiation, ZOPA refers to:",
     options: [
-      "The Zone of Possible Agreement, where parties' positions overlap",
-      "The Zonal Offer and Price Agreement, a formal contract",
-      "Zero-sum Outcome Proposal Analysis, a win-lose scenario",
-      "Z-score of Agreements, measuring negotiation success"
+      "Zone of Possible Agreement",
+      "Zero-sum Outcome Proposal Analysis",
+      "Zonal Offer & Price Assessment",
+      "Zone of Optimal Profit Allocation"
     ],
     correctIndex: 0,
-    correctAnswerText: "ZOPA means Zone of Possible Agreement – the range in which a deal can be made."
+    correctAnswerText: "ZOPA = Zone of Possible Agreement – the overlap in acceptable deals."
   },
   {
-    q: "Integrative negotiation focuses on:",
+    q: "Integrative negotiation is about:",
     options: [
-      "Creating win-win solutions by expanding the pie for all",
+      "Creating win–win solutions for all parties",
       "Winning at all costs, even if the other party loses",
       "Splitting the difference on a single issue",
       "Using intimidation tactics to gain an advantage"
     ],
     correctIndex: 0,
-    correctAnswerText: "Integrative negotiation is about collaboration and finding win-win outcomes for all parties."
+    correctAnswerText: "Integrative negotiation focuses on collaboration and finding joint gains."
   },
   {
-    q: "One of the two key rules of negotiation is:",
+    q: "One of the two golden rules of negotiation is:",
     options: [
-      "Always be willing to walk away if terms are unacceptable",
-      "Never make the first offer in a negotiation",
-      "Disclose your bottom line early to build trust",
-      "Always insist on your initial position"
+      "Know how you value things and how the other party values things",
+      "Always make the first offer",
+      "Never reveal your reservation price",
+      "Insist on a 50/50 split"
     ],
     correctIndex: 0,
-    correctAnswerText: "A key rule is to be ready to walk away if you can't get a satisfactory deal (another is to always ask for what you want)."
+    correctAnswerText: "The key rules are understanding both your and the other side’s priorities (and BATNAs)."
   },
   {
-    q: "What is the 'reservation price' in a negotiation?",
+    q: "Your reservation price is:",
     options: [
-      "The least favorable point at which one will accept a deal",
-      "The price set aside for future negotiations",
-      "An agreed-upon price that's temporarily reserved",
-      "The optimal price both parties aim to achieve"
+      "The least favorable point at which you will accept a deal",
+      "The price you keep reserved for yourself",
+      "A temporary price held during negotiations",
+      "The optimal target price you aim for"
     ],
     correctIndex: 0,
-    correctAnswerText: "A reservation price is the lowest (or highest) price a party is willing to accept – beyond this point, they'd walk away."
+    correctAnswerText: "Reservation price = your walk-away point; beyond this, you prefer no deal."
   }
 ];
 
-// DOM element references
-const menuDiv = document.getElementById("menu");
-const gameDiv = document.getElementById("game");
-const scenarioTitle = document.getElementById("scenario-title");
-const negotiatorImg = document.getElementById("negotiator-img");
-const dialogueDiv = document.getElementById("dialogue");
-const offerSection = document.getElementById("offer-section");
-const offerInput = document.getElementById("offer-input");
-const submitOfferBtn = document.getElementById("submit-offer");
-const outcomeDiv = document.getElementById("outcome");
-const bonusQuestionDiv = document.getElementById("bonus-question");
-const questionText = document.getElementById("question-text");
-const optionsList = document.getElementById("options-list");
-const answerFeedback = document.getElementById("answer-feedback");
-const continueBtn = document.getElementById("continue-btn");
-const backBtn = document.getElementById("back-btn");
-
-// Scenario configurations (titles, images, etc.)
-const scenariosConfig = {
-  car: {
-    title: "Car Negotiation",
-    img: "images/car_salesman.png",         // placeholder path for negotiator image
-    imgAlt: "Car Salesman",
-    placeholder: "Enter your car offer (£)",
-    // Negotiation parameters
-    initialAsk: 5000,
-    minAcceptable: 4500
-  },
-  salary: {
-    title: "Salary Negotiation",
-    img: "images/boss.png",                // placeholder path for boss image
-    imgAlt: "Hiring Manager",
-    placeholder: "Enter your salary offer (£)",
-    initialOffer: 50000,
-    maxOffer: 60000
-  },
-  ai: {
-    title: "Rogue AI Negotiation",
-    img: "images/rogue_ai.png",            // placeholder path for AI image
-    imgAlt: "Rogue AI",
-    placeholder: "Enter your resource offer (units)",
-    // Negotiation parameters
-    demand: 100,
-    minRequired: 60
-  }
+// ----------------------------
+// Cached DOM Elements
+// ----------------------------
+const screens = {
+  initial: document.getElementById('initial-screen'),
+  scenarios: document.getElementById('scenario-selection'),
+  carSelect: document.getElementById('car-selection'),
+  salaryRole: document.getElementById('salary-role-selection'),
+  negotiation: document.getElementById('negotiation'),
+  bonus: document.getElementById('bonus-question'),
+  congrats: document.getElementById('congratulations'),
+  highScores: document.getElementById('high-scores')
 };
 
-// Utility function: append a line to dialogue
-function appendDialogue(speaker, text) {
-  const p = document.createElement("p");
-  p.textContent = text;
-  if (speaker === "you") {
-    p.classList.add("you");
-    p.textContent = "You: " + text;
-  } else if (speaker === "npc") {
-    p.classList.add("npc");
-    // Prepend role name (based on scenario)
-    let role = "";
-    if (currentScenario === "car") role = "Seller: ";
-    if (currentScenario === "salary") role = "Manager: ";
-    if (currentScenario === "ai") role = "AI: ";
-    p.textContent = role + text;
-  }
-  dialogueDiv.appendChild(p);
-  // Scroll dialogue to bottom if overflow (to see latest message)
-  dialogueDiv.scrollTop = dialogueDiv.scrollHeight;
+const startBtn      = document.getElementById('start-button');
+const scenarioBtns  = document.querySelectorAll('.scenario-button');
+const highScoresBtn = document.getElementById('high-scores-button');
+const backBtns      = document.querySelectorAll('.back-button');
+const carOptions    = document.querySelectorAll('.car-option');
+const roleBtns      = document.querySelectorAll('.role-button');
+
+const sellerDialog      = document.getElementById('seller-dialog');
+const carImageNeg       = document.getElementById('negotiation-car-image');
+const offerInput        = document.getElementById('offer-input');
+const proposeBtn        = document.getElementById('propose-offer');
+const acceptBtn         = document.getElementById('accept-offer');
+
+const bonusDiv          = document.getElementById('bonus-question');
+const bonusTextEl       = document.getElementById('bonus-text');
+const bonusOptionsEl    = document.getElementById('bonus-options');
+const bonusConfirmBtn   = document.getElementById('bonus-confirm');
+
+const congratsImage     = document.getElementById('car-image');
+const scoreTextEl       = document.getElementById('score-text');
+
+const highScoresText    = document.getElementById('high-scores-text');
+const resetHighScoresBtn= document.getElementById('reset-high-scores-button');
+
+// ----------------------------
+// Helper: Switch Visible Screen
+// ----------------------------
+function switchScreen(key) {
+  Object.values(screens).forEach(s => s.classList.add('hidden'));
+  screens[key].classList.remove('hidden');
 }
 
-// Start a scenario
-function startScenario(scenarioKey) {
-  currentScenario = scenarioKey;
-  // Setup UI for scenario
-  scenarioTitle.textContent = scenariosConfig[scenarioKey].title;
-  negotiatorImg.src = scenariosConfig[scenarioKey].img;
-  negotiatorImg.alt = scenariosConfig[scenarioKey].imgAlt;
-  offerInput.placeholder = scenariosConfig[scenarioKey].placeholder;
-  // Show input section for all scenarios (in case it was hidden previously for AI in original code, ensure visible now)
-  offerSection.style.display = "flex";
-  submitOfferBtn.style.display = "inline-block";
-  offerInput.value = "";  // clear any previous input
-  outcomeDiv.textContent = "";
-  bonusQuestionDiv.style.display = "none";
-  answerFeedback.textContent = "";
-  continueBtn.style.display = "none";
-  // Show game container, hide menu
-  menuDiv.style.display = "none";
-  gameDiv.style.display = "block";
-  dialogueDiv.innerHTML = "";  // clear previous dialogue
+// ----------------------------
+// Navigation Event Listeners
+// ----------------------------
+startBtn.addEventListener('click', () => switchScreen('scenarios'));
 
-  // Initialize scenario-specific state
-  if (scenarioKey === "car") {
-    // Car negotiation initial state
-    scenarioState.round = 1;
-    scenarioState.sellerMin = scenariosConfig.car.minAcceptable;
-    scenarioState.lastCounter = null;
-    // Introduce scenario in dialogue
-    appendDialogue("npc", `I'm asking £${scenariosConfig.car.initialAsk} for this car.`);
-    appendDialogue("npc", "What's your offer?");
-  } else if (scenarioKey === "salary") {
-    scenarioState.round = 1;
-    scenarioState.managerMax = scenariosConfig.salary.maxOffer;
-    scenarioState.lastCounter = null;
-    // Manager states initial offer
-    appendDialogue("npc", `We can offer £${scenariosConfig.salary.initialOffer} to start.`);
-    appendDialogue("npc", "What salary do you have in mind?");
-  } else if (scenarioKey === "ai") {
-    scenarioState.round = 1;
-    scenarioState.minRequired = scenariosConfig.ai.minRequired;
-    scenarioState.lastDemand = null;
-    // AI states its demand
-    appendDialogue("npc", `I demand ${scenariosConfig.ai.demand} units of computing power.`);
-    appendDialogue("npc", "How much will you offer me?");
+scenarioBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const scen = btn.getAttribute('data-scenario');
+    currentScenario = scen;
+    if (scen === 'buy-car') {
+      switchScreen('carSelect');
+    } else if (scen === 'rogue-ai') {
+      startAINegotiation();
+      switchScreen('negotiation');
+    } else if (scen === 'salary-negotiation') {
+      switchScreen('salaryRole');
+    }
+  });
+});
+
+highScoresBtn.addEventListener('click', () => {
+  updateHighScores();
+  switchScreen('highScores');
+});
+
+backBtns.forEach(b => {
+  b.addEventListener('click', () => {
+    // Many back-buttons return to scenarios except specific ones
+    const id = b.id;
+    if (id === 'back-to-initial-from-scenarios') switchScreen('initial');
+    else if (id === 'back-to-scenarios-from-high-scores') switchScreen('scenarios');
+    else if (id === 'back-to-scenarios-from-congrats') {
+      switchScreen('scenarios');
+      resetNegotiation();
+    }
+    else if (id === 'back-to-car-selection-from-congrats') {
+      if (currentScenario === 'buy-car') switchScreen('carSelect');
+      else switchScreen('scenarios');
+      resetNegotiation();
+    }
+    else if (id === 'back-to-scenarios-from-salary-role') switchScreen('scenarios');
+    else if (id === 'back-to-scenarios') switchScreen('scenarios');
+    else if (id === 'back-to-car-selection') {
+      if (currentScenario === 'buy-car') switchScreen('carSelect');
+      else switchScreen('scenarios');
+      resetNegotiation();
+    }
+  });
+});
+
+resetHighScoresBtn.addEventListener('click', showResetConfirmation);
+
+// ----------------------------
+// Car Selection -> Start
+// ----------------------------
+carOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    const carType = opt.getAttribute('data-car');
+    startNegotiation(carType);
+    switchScreen('negotiation');
+  });
+});
+
+// ----------------------------
+// Salary Role Selection -> Start
+// ----------------------------
+roleBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    salaryRole = btn.getAttribute('data-role');
+    beginSalaryNegotiation(salaryRole);
+    switchScreen('negotiation');
+  });
+});
+
+// ----------------------------
+// Negotiation Event Handlers
+// ----------------------------
+proposeBtn.addEventListener('click', () => {
+  const val = parseFloat(offerInput.value.replace(/,/g, ''));
+  if (isNaN(val) || val <= 0) {
+    showInputError(offerInput, 'Please enter a valid number');
+    return;
+  }
+  if (currentScenario === 'buy-car') {
+    negotiationAttempts++;
+    handleOffer(val);
+    offerInput.value = '';
+  } else if (currentScenario === 'salary-negotiation') {
+    handleSalaryOffer();
+  } else if (currentScenario === 'rogue-ai') {
+    handleAIOffer(val);
+    offerInput.value = '';
+  }
+});
+
+acceptBtn.addEventListener('click', () => {
+  if (currentScenario === 'buy-car' || currentScenario === 'rogue-ai') {
+    const txt = acceptBtn.textContent;
+    const num = parseFloat(txt.replace(/[^0-9\.]/g, ''));
+    if (!isNaN(num)) endNegotiation(num);
+  } else if (currentScenario === 'salary-negotiation') {
+    acceptSalaryOffer();
+  }
+});
+
+// Enter key submits proposal
+offerInput.addEventListener('keypress', e => {
+  if (e.key === 'Enter') proposeBtn.click();
+});
+
+// ----------------------------
+// Car Negotiation Functions
+// ----------------------------
+function startNegotiation(carType) {
+  currentCar = carType;
+  negotiationAttempts = 0;
+  maxAttempts = Math.floor(Math.random() * 5) + 1;
+  const carSpecs = {
+    "new_car": { label: "New Car", price: 50000 },
+    "old_car": { label: "Old Car", price: 10000 },
+    "antique": { label: "Antique Car", price: 13000 }
+  };
+  initialPrice = carSpecs[carType].price;
+  minPrice = initialPrice * (0.75 + Math.random() * 0.1);
+  sellerDialog.innerHTML = `
+    🤑 Seller: Interested in this ${carSpecs[carType].label}?<br>
+    Initial Price: $${initialPrice.toLocaleString()}
+  `;
+  carImageNeg.src = `${carType}.png`;
+  offerInput.placeholder = "Enter your car offer (£)";
+  offerInput.classList.remove('hidden');
+  document.querySelector('.offer-buttons').classList.remove('hidden');
+}
+
+function handleOffer(offer) {
+  if (negotiationAttempts >= maxAttempts) {
+    sellerDialog.innerHTML = `
+      😠 Seller: Too many low offers! I'm ending negotiations.<br>
+      Final Price: $${initialPrice.toLocaleString()}
+    `;
+    acceptBtn.textContent = `Accept $${initialPrice.toLocaleString()}`;
+    return;
+  }
+  if (offer < minPrice * 0.9) {
+    const counterOffer = Math.floor(Math.random() * (initialPrice - minPrice) + minPrice);
+    sellerDialog.innerHTML = `
+      😠 Seller: That's insulting! My best: $${counterOffer.toLocaleString()}<br>
+      (Try offering between $${Math.floor(minPrice * 0.9).toLocaleString()} and $${Math.floor(minPrice * 1.1).toLocaleString()})
+    `;
+    acceptBtn.textContent = `Accept $${counterOffer.toLocaleString()}`;
+  } else if (offer < minPrice) {
+    const counterOffer = Math.floor(Math.random() * (minPrice - offer) + offer);
+    sellerDialog.innerHTML = `
+      🤔 Seller: Hmm... how about $${counterOffer.toLocaleString()}?<br>
+      (You're getting close!)
+    `;
+    acceptBtn.textContent = `Accept $${counterOffer.toLocaleString()}`;
+  } else if (offer < minPrice * 1.1) {
+    sellerDialog.innerHTML = `
+      😊 Seller: That's reasonable! I accept $${offer.toLocaleString()}!<br>
+      (Great negotiation!)
+    `;
+    acceptBtn.textContent = `Accept $${offer.toLocaleString()}`;
+  } else {
+    sellerDialog.innerHTML = `
+      🎉 Seller: Deal! Let's sign the papers for $${offer.toLocaleString()}!<br>
+      (You could have gotten a better deal)
+    `;
+    acceptBtn.textContent = `Accept $${offer.toLocaleString()}`;
   }
 }
 
-// Finish negotiation and trigger bonus question phase
-function finalizeNegotiation(success, finalValue, scorePercent) {
-  // success: boolean indicating if negotiation succeeded or failed
-  // finalValue: final agreed value or last offer made
-  // scorePercent: base score (0-100) computed for negotiation outcome
-  offerSection.style.display = "none";        // hide input & submit during question phase
-  submitOfferBtn.style.display = "none";
-  if (success) {
-    // Display outcome message for success
-    if (currentScenario === "car") {
-      outcomeDiv.textContent = `Deal made! You bought the car for £${finalValue}.`;
-    } else if (currentScenario === "salary") {
-      outcomeDiv.textContent = `Negotiation successful! Your salary is £${finalValue}.`;
-    } else if (currentScenario === "ai") {
-      outcomeDiv.textContent = `Agreement reached. AI is allotted ${finalValue} units.`;
+function endNegotiation(offer) {
+  agreedPrice = offer;
+  const score = Math.max(0, initialPrice - agreedPrice);
+  // Save base score for bonus round
+  bonusBaseScore = score;
+  bonusScenarioType = 'buy-car';
+  bonusFinalValue = agreedPrice;
+  saveHighScores();     // Keep original storage until final bonus
+  createConfetti();
+  showBonusQuestion();
+}
+
+// ----------------------------
+// Rogue AI Negotiation (New)
+// ----------------------------
+function startAINegotiation() {
+  currentScenario = 'rogue-ai';
+  aiState = { round: 1, demand: 100, minRequired: 60, lastDemand: 0 };
+  carImageNeg.src = "exo9.png";
+  sellerDialog.innerHTML = `
+    🤖 EXO-9: I demand ${aiState.demand} units of computing power.<br>
+    Your offer?
+  `;
+  offerInput.placeholder = "Enter your resource offer (units)";
+  offerInput.classList.remove('hidden');
+  document.querySelector('.offer-buttons').classList.remove('hidden');
+}
+
+function handleAIOffer(offer) {
+  if (aiState.round === 1) {
+    if (offer >= aiState.demand) {
+      sellerDialog.innerHTML = `🤖 EXO-9: Agreement accepted at ${offer} units.`;
+      endAINegotiation(offer);
+    } else if (offer < aiState.minRequired) {
+      sellerDialog.innerHTML = `🤖 EXO-9: Insufficient. I require at least ${aiState.minRequired}.`;
+      aiState.round = 2;
+    } else {
+      aiState.lastDemand = Math.floor((aiState.demand + offer) / 2);
+      sellerDialog.innerHTML = `🤖 EXO-9: Not enough. I need ${aiState.lastDemand} units.`;
+      aiState.round = 2;
+    }
+  } else if (aiState.round === 2) {
+    if (offer < aiState.minRequired) {
+      sellerDialog.innerHTML = `🤖 EXO-9: Negotiation failed.`;
+      endAINegotiation(offer);
+    } else if (offer >= aiState.lastDemand) {
+      sellerDialog.innerHTML = `🤖 EXO-9: Deal at ${offer} units.`;
+      endAINegotiation(offer);
+    } else {
+      const finalDemand = Math.floor((aiState.lastDemand + offer) / 2);
+      sellerDialog.innerHTML = `🤖 EXO-9: Final demand: ${finalDemand} units.`;
+      aiState.lastDemand = finalDemand;
+      aiState.round = 3;
     }
   } else {
-    // Display failure message
-    if (currentScenario === "car") {
-      outcomeDiv.textContent = "Negotiation failed. The seller walked away.";
-    } else if (currentScenario === "salary") {
-      outcomeDiv.textContent = "Negotiation failed. No salary agreement was reached.";
-    } else if (currentScenario === "ai") {
-      outcomeDiv.textContent = "Negotiation failed. The AI refuses to cooperate.";
+    // round 3
+    if (offer >= aiState.lastDemand) {
+      sellerDialog.innerHTML = `🤖 EXO-9: Agreement reached at ${offer} units.`;
+      endAINegotiation(offer);
+    } else {
+      sellerDialog.innerHTML = `🤖 EXO-9: No agreement.`;
+      endAINegotiation(offer);
     }
   }
-  // Show base negotiation score
-  outcomeDiv.textContent += ` (Negotiation Score: ${scorePercent}%)`;
-  // Proceed to bonus question regardless of success/fail, for learning opportunity
-  presentBonusQuestion(scorePercent);
 }
 
-// Bonus Question Phase
-function presentBonusQuestion(baseScore) {
-  // Pick a random question from the pool
-  const qIndex = Math.floor(Math.random() * questionPool.length);
-  const qObj = questionPool[qIndex];
-  // Display question and options
-  questionText.textContent = qObj.q;
-  optionsList.innerHTML = "";
-  answerFeedback.textContent = "";
-  continueBtn.style.display = "none";
-  bonusQuestionDiv.style.display = "block";
-  // Create option buttons
-  qObj.options.forEach((optText, i) => {
-    const li = document.createElement("li");
-    const btn = document.createElement("button");
-    btn.textContent = optText;
-    btn.className = "option-btn";
-    // Attach event to handle answer selection
-    btn.addEventListener("click", () => {
-      // Disable all option buttons after answering
-      const allOptionButtons = document.querySelectorAll(".option-btn");
-      allOptionButtons.forEach(b => b.disabled = true);
-      let correctIdx = qObj.correctIndex;
-      // Highlight correct and chosen answers
-      if (i === correctIdx) {
-        btn.classList.add("correct");
-        answerFeedback.className = "correct";
-        answerFeedback.textContent = "Correct! " + qObj.correctAnswerText;
+function endAINegotiation(finalUnits) {
+  // Score: fewer units given = better score
+  const range = aiState.demand - aiState.minRequired;
+  const given = finalUnits;
+  let score = 0;
+  if (range > 0) score = Math.round(((aiState.demand - given) / range) * 100);
+  else score = 0;
+  bonusBaseScore = score;
+  bonusScenarioType = 'rogue-ai';
+  bonusFinalValue = finalUnits;
+  saveHighScores();
+  createConfetti();
+  showBonusQuestion();
+}
+
+// ----------------------------
+// Salary Negotiation Functions
+// ----------------------------
+function beginSalaryNegotiation(role) {
+  currentScenario = 'salary-negotiation';
+  salaryRole = role;
+  if (role === "high") {
+    initialSalaryOffer = 35000;
+    employerMax = 60000;
+  } else {
+    initialSalaryOffer = 25000;
+    employerMax = 40000;
+  }
+  employerRemaining = employerMax - initialSalaryOffer;
+  incentiveBonus = 0;
+  requestedIncentives = [];
+  incentiveRequestsCount = 0;
+  finalSalaryOffer = 0;
+
+  offerInput.value = '';
+  offerInput.placeholder = "Enter your salary offer (£)";
+  // Recreate buttons for salary negotiation
+  const btnGroup = document.querySelector('.offer-buttons');
+  btnGroup.innerHTML = '';
+
+  const negotiateBtn = document.createElement('button');
+  negotiateBtn.id = "propose-offer";
+  negotiateBtn.textContent = "Negotiate Salary";
+  negotiateBtn.classList.add('salary-button');
+  negotiateBtn.addEventListener('click', handleSalaryOffer);
+  btnGroup.appendChild(negotiateBtn);
+
+  const incentiveBtn = document.createElement('button');
+  incentiveBtn.id = "request-incentive";
+  incentiveBtn.textContent = "Request Incentive";
+  incentiveBtn.classList.add('salary-button');
+  incentiveBtn.addEventListener('click', requestIncentiveSalary);
+  btnGroup.appendChild(incentiveBtn);
+
+  const walkAwayBtn = document.createElement('button');
+  walkAwayBtn.id = "walk-away";
+  walkAwayBtn.textContent = "Walk Away";
+  walkAwayBtn.classList.add('salary-button');
+  walkAwayBtn.addEventListener('click', walkAwaySalary);
+  btnGroup.appendChild(walkAwayBtn);
+
+  const acceptBtn2 = document.createElement('button');
+  acceptBtn2.id = "accept-offer";
+  acceptBtn2.textContent = "Accept Offer";
+  acceptBtn2.classList.add('salary-button');
+  acceptBtn2.addEventListener('click', acceptSalaryOffer);
+  btnGroup.appendChild(acceptBtn2);
+
+  sellerDialog.innerHTML = `Employer: We propose a salary of £${initialSalaryOffer.toLocaleString()}. What are your thoughts?`;
+  carImageNeg.src = "employer-interview_picture.png";
+}
+
+function handleSalaryOffer() {
+  const offer = parseFloat(offerInput.value.replace(/,/g, ''));
+  if (isNaN(offer) || offer <= 0) { 
+    showInputError(offerInput, 'Please enter a valid salary amount');
+    return;
+  }
+  let counterOffer = 0;
+  let accepted = false;
+
+  if (salaryRole === "high") {
+    if (offer > employerMax) {
+      sellerDialog.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`;
+      finalSalaryOffer = 0;
+      endSalaryNegotiation();
+      return;
+    }
+    if (offer > 50000) {
+      const rejChance = (offer - 50000) / (employerMax - 50000);
+      if (Math.random() < rejChance) {
+        sellerDialog.innerHTML = `Employer: Your demand is too high. Offer rejected.`;
+        finalSalaryOffer = 0;
+        endSalaryNegotiation();
+        return;
       } else {
-        btn.classList.add("wrong");
-        // highlight the correct answer as well
-        allOptionButtons[correctIdx].classList.add("correct");
-        answerFeedback.className = "wrong";
-        answerFeedback.textContent = "Incorrect. " + qObj.correctAnswerText;
+        counterOffer = Math.floor(Math.random() * (employerMax - offer) + offer);
+        sellerDialog.innerHTML = `Employer: We counter with £${counterOffer.toLocaleString()}. You may negotiate further.`;
       }
-      // Calculate and display final score with bonus if correct
-      let finalScore = baseScore;
-      if (i === correctIdx) {
-        finalScore = Math.round(baseScore * 1.2);  // +20% bonus
-        // Cap the final score at 120% for cases where baseScore was 100 (so it becomes 120)
-        // Actually, allow going above 100% to show bonus effect
-        answerFeedback.textContent += ` You earned a 20% bonus. Final Score: ${finalScore}%`;
+    } else {
+      const rejChance = (offer - initialSalaryOffer) / (employerMax - initialSalaryOffer);
+      if (Math.random() < rejChance) {
+        counterOffer = Math.floor(Math.random() * (offer - initialSalaryOffer) + initialSalaryOffer);
+        sellerDialog.innerHTML = `Employer: Your offer of £${offer.toLocaleString()} is not acceptable. Our counteroffer is £${counterOffer.toLocaleString()}.`;
       } else {
-        answerFeedback.textContent += ` Final Score remains ${baseScore}%.`;
+        accepted = true;
       }
-      // Show continue button to go back to menu
-      continueBtn.style.display = "inline-block";
+    }
+  } else { // low role
+    if (offer > employerMax) {
+      sellerDialog.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`;
+      finalSalaryOffer = 0;
+      endSalaryNegotiation();
+      return;
+    }
+    if (offer > 35000) {
+      const rejChance = (offer - 35000) / (employerMax - 35000);
+      if (Math.random() < rejChance) {
+        sellerDialog.innerHTML = `Employer: Your demand is too high. Offer rejected.`;
+        finalSalaryOffer = 0;
+        endSalaryNegotiation();
+        return;
+      } else {
+        counterOffer = Math.floor(Math.random() * (employerMax - offer) + offer);
+        sellerDialog.innerHTML = `Employer: We counter with £${counterOffer.toLocaleString()}. You may negotiate further.`;
+      }
+    } else {
+      const rejChance = (offer - initialSalaryOffer) / (employerMax - initialSalaryOffer);
+      if (Math.random() < rejChance) {
+        counterOffer = Math.floor(Math.random() * (offer - initialSalaryOffer) + initialSalaryOffer);
+        sellerDialog.innerHTML = `Employer: Your offer of £${offer.toLocaleString()} is not acceptable. Our counteroffer is £${counterOffer.toLocaleString()}.`;
+      } else {
+        accepted = true;
+      }
+    }
+  }
+
+  if (accepted) {
+    finalSalaryOffer = offer;
+    sellerDialog.innerHTML = `Employer: Your offer of £${offer.toLocaleString()} is accepted.`;
+  } else if (counterOffer) {
+    offerInput.value = counterOffer;
+  }
+}
+
+function requestIncentiveSalary() {
+  if (incentiveRequestsCount >= maxIncentives) {
+    showTemporaryMessage("You have reached the maximum number of incentive requests.");
+    return;
+  }
+  const available = incentivesData.filter(i => !requestedIncentives.includes(i.name));
+  if (available.length === 0) {
+    showTemporaryMessage("No more incentives available.");
+    return;
+  }
+  const div = document.getElementById('salary-incentives');
+  div.innerHTML = '';
+  div.classList.remove('hidden');
+  available.forEach(incentive => {
+    const btn = document.createElement('button');
+    btn.textContent = incentive.name;
+    btn.classList.add('salary-button');
+    btn.addEventListener('click', () => {
+      let currentOffer = finalSalaryOffer || parseFloat(offerInput.value) || initialSalaryOffer;
+      let cost = incentive.cost;
+      let fullValue = incentive.value;
+      if (incentive.costPercent) cost = Math.floor((incentive.costPercent / 100) * currentOffer);
+      if (incentive.valuePercent) fullValue = Math.floor((incentive.valuePercent / 100) * currentOffer);
+
+      const rand = Math.random();
+      if (rand < 0.4 && employerRemaining >= cost) {
+        requestedIncentives.push(`${incentive.name} (Full)`);
+        incentiveBonus += fullValue;
+        employerRemaining -= cost;
+        sellerDialog.innerHTML = `Employer: ${incentive.name} fully approved.`;
+        incentiveRequestsCount++;
+      } else if (rand < 0.7 && employerRemaining >= Math.floor(cost / 2)) {
+        requestedIncentives.push(`${incentive.name} (Partial)`);
+        incentiveBonus += Math.floor(fullValue * 0.5);
+        employerRemaining -= Math.floor(cost / 2);
+        sellerDialog.innerHTML = `Employer: ${incentive.name} partially approved.`;
+        incentiveRequestsCount++;
+      } else {
+        const alt = available.find(inv => inv.name !== incentive.name && employerRemaining >= (inv.cost || 0));
+        if (alt) {
+          requestedIncentives.push(`${alt.name} (Alternative Offer)`);
+          let altValue = alt.value, altCost = alt.cost;
+          if (alt.valuePercent) altValue = Math.floor((alt.valuePercent / 100) * currentOffer);
+          if (alt.costPercent) altCost = Math.floor((alt.costPercent / 100) * currentOffer);
+          incentiveBonus += Math.floor(altValue * 0.75);
+          employerRemaining -= altCost;
+          sellerDialog.innerHTML = `Employer: ${incentive.name} not approved, but we can offer ${alt.name} at 75% value.`;
+          incentiveRequestsCount++;
+        } else {
+          sellerDialog.innerHTML = `Employer: We cannot accommodate the ${incentive.name} request.`;
+        }
+      }
+      div.innerHTML = '';
+      div.classList.add('hidden');
     });
-    li.appendChild(btn);
-    optionsList.appendChild(li);
+    div.appendChild(btn);
   });
 }
 
-// Event handlers for scenario start buttons
-document.getElementById("start-car").addEventListener("click", () => startScenario("car"));
-document.getElementById("start-salary").addEventListener("click", () => startScenario("salary"));
-document.getElementById("start-ai").addEventListener("click", () => startScenario("ai"));
+function walkAwaySalary() {
+  if (Math.random() < 0.5) {
+    const newOffer = Math.floor(Math.random() * (employerMax - initialSalaryOffer) + initialSalaryOffer);
+    sellerDialog.innerHTML = `Employer: Before you leave, consider our new offer of £${newOffer.toLocaleString()}.`;
+    offerInput.value = newOffer;
+  } else {
+    sellerDialog.innerHTML = `Employer: No deal. Better luck next time!`;
+    finalSalaryOffer = 0;
+    endSalaryNegotiation();
+  }
+}
 
-// Handle offer submission during negotiation
-submitOfferBtn.addEventListener("click", () => {
-  if (!currentScenario) return;
-  const offerValue = parseInt(offerInput.value);
-  if (isNaN(offerValue)) {
-    return; // if no valid number entered, do nothing
+function acceptSalaryOffer() {
+  if (!finalSalaryOffer) {
+    finalSalaryOffer = parseFloat(offerInput.value) || initialSalaryOffer;
   }
-  // Append player's offer to dialogue
-  appendDialogue("you", `£${offerValue}`);
-  if (currentScenario === "car") {
-    handleCarNegotiation(offerValue);
-  } else if (currentScenario === "salary") {
-    handleSalaryNegotiation(offerValue);
-  } else if (currentScenario === "ai") {
-    handleAINegotiation(offerValue);
-  }
-  // Clear input for next round
-  offerInput.value = "";
+  endSalaryNegotiation();
+}
+
+function endSalaryNegotiation() {
+  const baseScore = Math.floor((finalSalaryOffer / initialSalaryOffer) * 100);
+  bonusBaseScore = baseScore + incentiveBonus;
+  bonusScenarioType = 'salary-negotiation';
+  bonusFinalValue = finalSalaryOffer;
+  saveHighScores();
+  createConfetti();
+  showBonusQuestion();
+}
+
+// ----------------------------
+// Bonus Question Phase
+// ----------------------------
+function showBonusQuestion() {
+  switchScreen('bonus');
+  bonusOptionsEl.innerHTML = '';
+  bonusConfirmBtn.classList.add('hidden');
+
+  // Pick random question
+  const q = questionPool[Math.floor(Math.random() * questionPool.length)];
+  bonusTextEl.textContent = q.q;
+
+  // Render options
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.className = 'option-btn';
+    btn.addEventListener('click', () => {
+      // disable all
+      document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+      let finalScore = bonusBaseScore;
+      if (i === q.correctIndex) {
+        finalScore = Math.round(bonusBaseScore * 1.2);
+        bonusTextEl.textContent += `\n\n✅ Correct! ${q.correctAnswerText}\nFinal Score: ${finalScore}`;
+      } else {
+        bonusTextEl.textContent += `\n\n❌ Incorrect. ${q.correctAnswerText}\nFinal Score: ${finalScore}`;
+      }
+
+      // Update high score based on finalScore
+      if (bonusScenarioType === 'buy-car') {
+        if (finalScore > highScores["Buy a Car"][currentCar]) {
+          highScores["Buy a Car"][currentCar] = finalScore;
+        }
+      } else if (bonusScenarioType === 'rogue-ai') {
+        if (finalScore > highScores["Rogue AI Negotiation"]) {
+          highScores["Rogue AI Negotiation"] = finalScore;
+        }
+      } else if (bonusScenarioType === 'salary-negotiation') {
+        if (finalScore > highScores["Salary Negotiation"]) {
+          highScores["Salary Negotiation"] = finalScore;
+        }
+      }
+      saveHighScores();
+
+      // Prepare congratulations screen
+      scoreTextEl.textContent = `Your total score: ${finalScore}${finalScore > 100 ? "%" : ""}`;
+      if (bonusScenarioType === 'buy-car') congratsImage.src = `${currentCar}.png`;
+      else if (bonusScenarioType === 'rogue-ai') congratsImage.src = "exo9.png";
+      else congratsImage.src = "seller.jpg";
+
+      bonusConfirmBtn.classList.remove('hidden');
+    });
+    bonusOptionsEl.appendChild(btn);
+  });
+}
+
+bonusConfirmBtn.addEventListener('click', () => {
+  switchScreen('congrats');
 });
 
-// Car negotiation logic (offer/counter-offer)
-function handleCarNegotiation(playerOffer) {
-  const askPrice = scenariosConfig.car.initialAsk;
-  const sellerMin = scenarioState.sellerMin;
-  let round = scenarioState.round;
-  if (round === 1) {
-    if (playerOffer >= askPrice) {
-      // Player meets or exceeds asking price -> instant accept
-      appendDialogue("npc", "Deal! It's yours for that price.");
-      // Finalize success
-      // Calculate score (lower price is better for buyer)
-      let score = Math.max(0, Math.min(100, Math.round(((askPrice - playerOffer) / (askPrice - sellerMin)) * 100)));
-      finalizeNegotiation(true, playerOffer, score);
-    } else if (playerOffer < sellerMin) {
-      // Offer below minimum -> Seller reveals bottom line
-      appendDialogue("npc", `I can't go that low. The lowest I'd consider is £${sellerMin}.`);
-      appendDialogue("npc", "That's my final offer.");
-      scenarioState.round = 2;
-      scenarioState.thresholdRevealed = true;
-    } else { 
-      // Offer is within acceptable range but below ask -> counter-offer
-      let counter;
-      if (playerOffer >= askPrice * 0.96) {
-        // If offer is very close to asking (within ~4%)
-        counter = askPrice;  // seller holds at asking price
-      } else {
-        counter = Math.min(askPrice, playerOffer + 200);
-      }
-      appendDialogue("npc", `I can't let it go for £${playerOffer}. I can do £${counter}.`);
-      scenarioState.lastCounter = counter;
-      scenarioState.round = 2;
-      scenarioState.thresholdRevealed = false;
-    }
-  } else if (round === 2) {
-    if (scenarioState.thresholdRevealed) {
-      // Threshold was revealed in round 1
-      if (playerOffer < sellerMin) {
-        appendDialogue("npc", "I told you £4500 is my final offer. No deal.");
-        // Fail negotiation
-        finalizeNegotiation(false, playerOffer, 0);
-      } else {
-        appendDialogue("npc", `Alright, we have a deal at £${playerOffer}.`);
-        let score = Math.max(0, Math.min(100, Math.round(((askPrice - playerOffer) / (askPrice - sellerMin)) * 100)));
-        finalizeNegotiation(true, playerOffer, score);
-      }
-    } else {
-      // A counter was given in round 1
-      const lastCounter = scenarioState.lastCounter;
-      if (playerOffer >= lastCounter) {
-        // Player met or exceeded seller's counter -> accept
-        appendDialogue("npc", `Deal! I'll accept £${playerOffer}.`);
-        let finalPrice = playerOffer;
-        if (playerOffer > lastCounter) {
-          finalPrice = lastCounter; // if player somehow offered more than counter, deal at counter price (no need to overpay)
-        }
-        let score = Math.max(0, Math.min(100, Math.round(((askPrice - finalPrice) / (askPrice - sellerMin)) * 100)));
-        finalizeNegotiation(true, finalPrice, score);
-      } else if (playerOffer < sellerMin) {
-        // Player went below seller's minimum in second round (unlikely if first offer was above min, but just in case)
-        appendDialogue("npc", "That's even worse. We are too far apart.");
-        finalizeNegotiation(false, playerOffer, 0);
-      } else if (playerOffer >= sellerMin && playerOffer < lastCounter) {
-        // Player countered with a number still below seller's ask
-        // Seller gives one final offer (midpoint or close to it)
-        let finalCounter = Math.max(sellerMin, Math.floor((lastCounter + playerOffer) / 2));
-        if (finalCounter < playerOffer) finalCounter = playerOffer;
-        if (finalCounter > lastCounter) finalCounter = lastCounter;
-        appendDialogue("npc", `Meet me halfway at £${finalCounter}. That's the lowest I'll go.`);
-        scenarioState.lastCounter = finalCounter;
-        scenarioState.round = 3;
-      }
-    }
-  } else if (round === 3) {
-    const lastCounter = scenarioState.lastCounter;
-    if (playerOffer >= lastCounter) {
-      appendDialogue("npc", `Alright. Deal at £${playerOffer}.`);
-      let finalPrice = playerOffer;
-      if (playerOffer > lastCounter) finalPrice = lastCounter;
-      let score = Math.max(0, Math.min(100, Math.round(((askPrice - finalPrice) / (askPrice - sellerMin)) * 100)));
-      finalizeNegotiation(true, finalPrice, score);
-    } else {
-      appendDialogue("npc", "If you can't meet my price, we have no deal.");
-      finalizeNegotiation(false, playerOffer, 0);
-    }
+// ----------------------------
+// High Scores & Reset
+// ----------------------------
+function saveHighScores() {
+  localStorage.setItem('highScores', JSON.stringify(highScores));
+}
+
+function updateHighScores() {
+  let text = "";
+  text += `Buy a Car:\n`;
+  const labels = { "new_car": "New Car", "old_car": "Old Car", "antique": "Antique Car" };
+  for (const c in highScores["Buy a Car"]) {
+    text += `  ${labels[c]}: $${highScores["Buy a Car"][c].toLocaleString()}\n`;
+  }
+  text += `\nRogue AI Negotiation: $${highScores["Rogue AI Negotiation"].toLocaleString()}\n`;
+  text += `\nSalary Negotiation: ${highScores["Salary Negotiation"]}%\n`;
+  highScoresText.textContent = text;
+}
+
+function showResetConfirmation() {
+  const overlay = document.createElement('div');
+  overlay.id = 'reset-confirmation-overlay';
+  const modal = document.createElement('div');
+  modal.id = 'reset-confirmation-modal';
+  modal.innerHTML = `<p>Are you sure you want to reset your High Scores?</p>`;
+  const yes = document.createElement('button');
+  yes.textContent = 'Yes';
+  const no = document.createElement('button');
+  no.textContent = 'No';
+  modal.appendChild(yes);
+  modal.appendChild(no);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  const autoRemove = setTimeout(() => {
+    if (document.body.contains(overlay)) document.body.removeChild(overlay);
+  }, 15000);
+
+  yes.addEventListener('click', () => {
+    clearTimeout(autoRemove);
+    performResetHighScores();
+    document.body.removeChild(overlay);
+    showTemporaryMessage("You have successfully reset your High Scores", 5000);
+  });
+  no.addEventListener('click', () => {
+    clearTimeout(autoRemove);
+    document.body.removeChild(overlay);
+  });
+}
+
+function performResetHighScores() {
+  highScores["Buy a Car"].new_car = 0;
+  highScores["Buy a Car"].old_car = 0;
+  highScores["Buy a Car"].antique = 0;
+  highScores["Rogue AI Negotiation"] = 0;
+  highScores["Salary Negotiation"] = 0;
+  saveHighScores();
+  updateHighScores();
+}
+
+// ----------------------------
+// Utilities
+// ----------------------------
+function createConfetti() {
+  const colors = ['#ff6b6b','#4ecdc4','#45b7d1','#96ceb4','#ffeead'];
+  const container = document.getElementById('congratulations');
+  document.querySelectorAll('.confetti').forEach(el => el.remove());
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 3 + 's';
+    container.appendChild(c);
   }
 }
 
-// Salary negotiation logic
-function handleSalaryNegotiation(playerRequest) {
-  const initialOffer = scenariosConfig.salary.initialOffer;
-  const maxOffer = scenarioState.managerMax;
-  let round = scenarioState.round;
-  if (round === 1) {
-    if (playerRequest <= initialOffer) {
-      // Player requested at or below initial offer -> manager accepts immediately
-      appendDialogue("npc", `Alright. We can do £${playerRequest}.`);
-      // If player undershot initial, company saves money - but negotiation ends
-      let finalSalary = playerRequest;
-      // Score: percentage of max raise achieved
-      let score = Math.max(0, Math.min(100, Math.round(((finalSalary - initialOffer) / (maxOffer - initialOffer)) * 100)));
-      finalizeNegotiation(true, finalSalary, score);
-    } else if (playerRequest > maxOffer) {
-      // Request above what manager can approve
-      appendDialogue("npc", `That's more than we can offer. The most I can do is £${maxOffer}.`);
-      scenarioState.round = 2;
-      scenarioState.maxRevealed = true;
-    } else {
-      // Within possible range but higher than initial -> counter
-      let counter;
-      if (playerRequest >= maxOffer * 0.96) {
-        // If request is very close to max
-        counter = maxOffer - 0; // manager might reveal near max
-        counter = maxOffer * 1; // ensure number
-      } else {
-        // Offer a bit above initial but below player's request
-        counter = Math.max(initialOffer, playerRequest - 2000);
-      }
-      if (counter < initialOffer) counter = initialOffer;
-      appendDialogue("npc", `We were thinking more along the lines of £${counter}.`);
-      scenarioState.lastCounter = counter;
-      scenarioState.round = 2;
-      scenarioState.maxRevealed = false;
-    }
-  } else if (round === 2) {
-    if (scenarioState.maxRevealed) {
-      // Manager had revealed max
-      if (playerRequest > maxOffer) {
-        appendDialogue("npc", "I'm sorry, we can't go any higher than that.");
-        finalizeNegotiation(false, playerRequest, 0);
-      } else {
-        appendDialogue("npc", `Deal. £${playerRequest} it is.`);
-        let finalSalary = playerRequest;
-        let score = Math.max(0, Math.min(100, Math.round(((finalSalary - initialOffer) / (maxOffer - initialOffer)) * 100)));
-        finalizeNegotiation(true, finalSalary, score);
-      }
-    } else {
-      // Manager had given a counter in round 1
-      const lastCounter = scenarioState.lastCounter;
-      if (playerRequest <= lastCounter) {
-        // Player came down to manager's offer or below -> accept
-        appendDialogue("npc", `Great. We have an agreement at £${playerRequest}.`);
-        let finalSalary = playerRequest;
-        if (playerRequest < lastCounter) {
-          finalSalary = playerRequest; // company pays even less if candidate went under? (Candidate wouldn't usually do this, but we'll honor the lower number.)
-        }
-        let score = Math.max(0, Math.min(100, Math.round(((finalSalary - initialOffer) / (maxOffer - initialOffer)) * 100)));
-        finalizeNegotiation(true, finalSalary, score);
-      } else if (playerRequest > maxOffer) {
-        appendDialogue("npc", "We cannot meet that request. It exceeds our limit.");
-        finalizeNegotiation(false, playerRequest, 0);
-      } else if (playerRequest > lastCounter && playerRequest <= maxOffer) {
-        // Player still wants more than manager's counter but not above max
-        // Manager makes a final offer (e.g., midpoint or max if close)
-        let finalOffer = Math.min(maxOffer, Math.floor((lastCounter + playerRequest) / 2));
-        if (finalOffer < lastCounter) finalOffer = lastCounter;
-        if (finalOffer > playerRequest) finalOffer = playerRequest;
-        appendDialogue("npc", `How about £${finalOffer}? That's our final offer.`);
-        scenarioState.lastCounter = finalOffer;
-        scenarioState.round = 3;
-      }
-    }
-  } else if (round === 3) {
-    const lastCounter = scenarioState.lastCounter;
-    if (playerRequest <= lastCounter) {
-      appendDialogue("npc", `Done. £${playerRequest} it is.`);
-      let finalSalary = playerRequest;
-      let score = Math.max(0, Math.min(100, Math.round(((finalSalary - initialOffer) / (maxOffer - initialOffer)) * 100)));
-      finalizeNegotiation(true, finalSalary, score);
-    } else {
-      appendDialogue("npc", "It seems we can't reach an agreement on that number.");
-      finalizeNegotiation(false, playerRequest, 0);
-    }
-  }
+function showInputError(inputEl, message) {
+  const orig = inputEl.placeholder;
+  inputEl.placeholder = message;
+  inputEl.style.borderColor = 'red';
+  setTimeout(() => {
+    inputEl.placeholder = orig;
+    inputEl.style.borderColor = 'var(--accent-color)';
+  }, 3000);
 }
 
-// AI negotiation logic
-function handleAINegotiation(playerOffer) {
-  const demand = scenariosConfig.ai.demand;
-  const minReq = scenarioState.minRequired;
-  let round = scenarioState.round;
-  if (round === 1) {
-    if (playerOffer >= demand) {
-      // Gave full or more than demanded
-      appendDialogue("npc", "Agreement accepted. You have given me what I want.");
-      if (playerOffer > demand) {
-        appendDialogue("npc", "You even offered more than I asked... interesting.");
-      }
-      // Success, but user conceded everything
-      let finalUnits = playerOffer;
-      if (playerOffer > demand) finalUnits = demand;
-      // Score: how much less than full demand was given (less is better for human)
-      let score = Math.max(0, Math.min(100, Math.round(((demand - finalUnits) / (demand - minReq)) * 100)));
-      finalizeNegotiation(true, finalUnits, score);
-    } else if (playerOffer < minReq) {
-      // Too low
-      appendDialogue("npc", `Insufficient. I require at least ${minReq} units.`);
-      appendDialogue("npc", "Anything less and there's no deal.");
-      scenarioState.round = 2;
-      scenarioState.minRevealed = true;
-    } else {
-      // Within range but below demand -> AI counters with a demand
-      let counterDemand;
-      if (playerOffer <= minReq + 5) {
-        // If offer just above minimum, AI still high demands
-        counterDemand = Math.floor((playerOffer + demand) / 2); // somewhere mid
-      } else {
-        counterDemand = playerOffer + 15;
-      }
-      if (counterDemand > demand) counterDemand = demand;
-      if (counterDemand < minReq) counterDemand = minReq;
-      scenarioState.lastDemand = counterDemand;
-      appendDialogue("npc", `Your offer is not enough. I need ${counterDemand} units of power.`);
-      scenarioState.round = 2;
-      scenarioState.minRevealed = false;
-    }
-  } else if (round === 2) {
-    if (scenarioState.minRevealed) {
-      // AI revealed minimum requirement
-      if (playerOffer < minReq) {
-        appendDialogue("npc", "You have failed to meet my minimum requirements. Negotiation over.");
-        finalizeNegotiation(false, playerOffer, 0);
-      } else {
-        appendDialogue("npc", `Acceptable. I will settle for ${playerOffer} units.`);
-        let finalUnits = playerOffer;
-        let score = Math.max(0, Math.min(100, Math.round(((demand - finalUnits) / (demand - minReq)) * 100)));
-        finalizeNegotiation(true, finalUnits, score);
-      }
-    } else {
-      const lastDemand = scenarioState.lastDemand;
-      if (playerOffer >= lastDemand) {
-        appendDialogue("npc", `Very well. I accept ${playerOffer} units.`);
-        let finalUnits = playerOffer;
-        if (playerOffer > lastDemand) finalUnits = lastDemand;
-        let score = Math.max(0, Math.min(100, Math.round(((demand - finalUnits) / (demand - minReq)) * 100)));
-        finalizeNegotiation(true, finalUnits, score);
-      } else if (playerOffer < minReq) {
-        appendDialogue("npc", "This offer is unacceptable. You have wasted my time.");
-        finalizeNegotiation(false, playerOffer, 0);
-      } else if (playerOffer >= minReq && playerOffer < lastDemand) {
-        // AI gives final compromise demand
-        let finalDemand = Math.max(minReq, Math.floor((lastDemand + playerOffer) / 2));
-        if (finalDemand < playerOffer) finalDemand = playerOffer;
-        if (finalDemand > lastDemand) finalDemand = lastDemand;
-        appendDialogue("npc", `I will compromise at ${finalDemand} units. This is my final offer.`);
-        scenarioState.lastDemand = finalDemand;
-        scenarioState.round = 3;
-      }
-    }
-  } else if (round === 3) {
-    const lastDemand = scenarioState.lastDemand;
-    if (playerOffer >= lastDemand) {
-      appendDialogue("npc", `Agreement reached at ${playerOffer} units.`);
-      let finalUnits = playerOffer;
-      if (playerOffer > lastDemand) finalUnits = lastDemand;
-      let score = Math.max(0, Math.min(100, Math.round(((demand - finalUnits) / (demand - minReq)) * 100)));
-      finalizeNegotiation(true, finalUnits, score);
-    } else {
-      appendDialogue("npc", "Negotiations have failed. You leave me no choice.");
-      finalizeNegotiation(false, playerOffer, 0);
-    }
-  }
+function showTemporaryMessage(message, duration = 2000) {
+  const msg = document.createElement('div');
+  msg.className = 'temp-message';
+  msg.textContent = message;
+  document.body.appendChild(msg);
+  setTimeout(() => {
+    msg.classList.add('fade-out');
+    setTimeout(() => msg.remove(), 300);
+  }, duration);
 }
 
-// Back to menu: reset to main menu view
-function backToMenu() {
-  // Hide game section, show menu
-  gameDiv.style.display = "none";
-  menuDiv.style.display = "block";
-  // Clear any dynamic content for a fresh start
-  dialogueDiv.innerHTML = "";
-  outcomeDiv.textContent = "";
-  bonusQuestionDiv.style.display = "none";
-  answerFeedback.textContent = "";
-  continueBtn.style.display = "none";
-  // Reset current scenario
+function resetNegotiation() {
+  currentCar = null;
   currentScenario = null;
-  scenarioState = {};
+  initialPrice = 0;
+  minPrice = 0;
+  agreedPrice = null;
+  negotiationAttempts = 0;
+  salaryRole = "";
+  initialSalaryOffer = 0;
+  employerMax = 0;
+  employerRemaining = 0;
+  finalSalaryOffer = 0;
+  incentiveBonus = 0;
+  requestedIncentives = [];
+  incentiveRequestsCount = 0;
+  aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0 };
+  offerInput.value = '';
+  document.getElementById('ai-options').innerHTML = '';
+  document.getElementById('ai-options').classList.add('hidden');
+  document.getElementById('salary-incentives').innerHTML = '';
+  document.getElementById('salary-incentives').classList.add('hidden');
 }
-
-// Back button (abort or return to menu)
-backBtn.addEventListener("click", () => {
-  backToMenu();
-});
-
-// Continue button after bonus question, also returns to menu
-continueBtn.addEventListener("click", () => {
-  backToMenu();
-});

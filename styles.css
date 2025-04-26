@@ -1,198 +1,265 @@
-/* Global styles */
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom right, #f0f4f8, #ffffff);
+/* styles.css */
+:root {
+  --primary-color: #2A2A2A;
+  --accent-color: #FF6B6B;
+  --background-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
+  --button-hover: #FF5252;
+  --card-bg: rgba(255, 255, 255, 0.1);
+  --border-radius: 15px;
+  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+* {
   margin: 0;
   padding: 0;
-  color: #333;
+  box-sizing: border-box;
 }
-
-/* Main menu container */
-#menu {
-  text-align: center;
-  padding: 50px 20px;
-}
-
-/* Scenario/game container */
-#game {
-  width: 90%;
-  max-width: 600px;
-  margin: 40px auto;
-  background: #fafafa;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-}
-
-/* Scenario title */
-#scenario-title {
-  text-align: center;
-  margin-top: 0;
-}
-
-/* Negotiator image styling */
-#negotiator-img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  margin: 10px auto 20px auto;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Dialogue box */
-#dialogue {
-  min-height: 100px;
-  background: #e8ebef;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  font-size: 0.95em;
-  line-height: 1.5;
-}
-#dialogue p {
-  margin: 5px 0;
-}
-#dialogue .you {
-  font-weight: bold;
-}
-#dialogue .npc {
-  /* You can italicize or style NPC dialogue if desired */
-}
-
-/* Offer input section */
-#offer-section {
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--background-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  justify-content: center;
+  align-items: center;
+}
+#game-container {
+  width: 95%;
+  max-width: 1200px;
+  padding: 2rem;
+  text-align: center;
+}
+h1, h2 {
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+h1 {
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  letter-spacing: 1.5px;
+}
+button {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--accent-color);
+  color: white;
+  box-shadow: var(--box-shadow);
+  margin: 0.5rem;
+}
+button:hover {
+  background: var(--button-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,82,82,0.4);
+}
+.hidden {
+  display: none !important;
+}
+
+/* Center the scenario buttons */
+.scenario-buttons-wrapper {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Car Selection */
+.car-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+.car-option img {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Salary Role Selection */
+#salary-role-selection {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+}
+#salary-role-selection p {
+  margin-bottom: 1rem;
+}
+
+/* Back Buttons */
+.back-button {
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Negotiation Screen */
+.negotiation-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.negotiation-car-img {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 1rem;
+  border-radius: var(--border-radius);
+}
+#seller-bubble {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  position: relative;
+}
+.seller-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1.5rem;
+}
+#seller-bubble::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 40px;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+  border-right-color: rgba(255, 255, 255, 0.9);
+  border-left: 0;
+  border-top: 0;
+}
+#player-bubble {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  background: var(--accent-color);
+  margin-top: 1rem;
+}
+#player-bubble::before {
+  content: '';
+  position: absolute;
+  right: -15px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+  border-left-color: var(--accent-color);
+  border-right: 0;
+  border-top: 0;
 }
 #offer-input {
-  flex: 1;
-  padding: 8px;
-  font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 1rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 50px;
+  background: transparent;
+  color: white;
+  font-size: 1.1rem;
+  margin-right: 1rem;
+  width: 100%;
+  max-width: 300px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 #offer-input:focus {
-  border-color: #66afe9;
   outline: none;
-  box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
+  border-color: var(--button-hover);
+  box-shadow: 0 0 8px rgba(255,82,82,0.5);
+}
+.offer-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-/* Buttons (general) */
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Menu and navigation buttons */
-#start-car, #start-salary, #start-ai {
-  font-size: 1em;
-  padding: 12px 20px;
-  margin: 10px;
-  background: linear-gradient(to bottom, #2196F3, #1976D2);
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-#start-car:hover, #start-salary:hover, #start-ai:hover {
-  /* Slightly lighten on hover */
-  background: linear-gradient(to bottom, #42A5F5, #1E88E5);
-}
-
-/* Submit offer and continue buttons */
-#submit-offer, #continue-btn {
-  background: linear-gradient(to bottom, #4CAF50, #388E3C);
-  color: #fff;
-  font-size: 1em;
-  padding: 10px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-#submit-offer:hover, #continue-btn:hover {
-  background: linear-gradient(to bottom, #66BB6A, #43A047);
-}
-
-/* Back button */
-#back-btn {
-  background: linear-gradient(to bottom, #f44336, #d32f2f);
-  color: #fff;
-  font-size: 0.9em;
-  padding: 8px 14px;
-  position: relative;
-  float: right;
-  margin-top: -40px; /* position back button at top right of the game box */
-  margin-right: -10px;
-}
-#back-btn:hover {
-  background: linear-gradient(to bottom, #e57373, #e53935);
-}
-
-/* Outcome text */
-#outcome {
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-/* Bonus question styles */
+/* Bonus Question Styles */
 #bonus-question {
-  background: #f5f5f5;
-  border-radius: 5px;
-  padding: 15px;
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
 }
-#question-text {
-  font-weight: bold;
+#bonus-options button {
+  display: block;
+  width: 80%;
+  margin: 0.5rem auto;
 }
-#options-list {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0;
-}
-#options-list li {
-  margin-bottom: 8px;
-}
-.option-btn {
-  width: 100%;
-  text-align: left;
-  padding: 8px 12px;
-  font-size: 0.95em;
-  border: 1px solid #ccc;
-  background: #eee;
-  color: #000;
-  border-radius: 4px;
-}
-.option-btn:hover {
-  background: #e0e0e0;
-}
-.option-btn.correct {
-  background: #c8e6c9; /* light green */
-}
-.option-btn.wrong {
-  background: #ffcdd2; /* light red */
-}
-/* Keep highlighted options visible even if disabled */
-.option-btn:disabled.correct, .option-btn:disabled.wrong {
-  opacity: 1;
-}
-/* Disabled options (not chosen) can be slightly faded */
-.option-btn:disabled {
-  cursor: default;
-  opacity: 0.6;
+#bonus-confirm {
+  margin-top: 1rem;
 }
 
-/* Answer feedback text */
-#answer-feedback.correct {
-  color: green;
+/* Congratulations Screen */
+#congratulations {
+  background: var(--card-bg);
+  padding: 3rem;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
 }
-#answer-feedback.wrong {
-  color: red;
+#car-image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
+  animation: float 3s ease-in-out infinite;
 }
-#answer-feedback {
-  font-weight: bold;
-  margin-top: 10px;
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
 }
+
+/* High Scores */
+#high-scores {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
+}
+#high-scores-text {
+  font-family: 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  text-align: left;
+  white-space: pre-wrap;
+}
+.button-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Salary-negotiation buttons */
+.salary-button {
+  background: #2A2A2A;
+  color: #fff;
+}
+.salary-button:hover {
+  background: var(--button-hover);
+}
+
+/* Bonus question option buttons */
+.option-btn {
+  width: 80%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin: 0.5rem auto;
+  display: block;
+  cursor: pointer;
+  background: #eee;
+  transition: background 0.2s;
+}
+.option-btn:hover { background: #ddd; }
+.option-btn.correct { background: #c8e6c9; }
+.option-btn.wrong   { background: #ffcdd2; }
