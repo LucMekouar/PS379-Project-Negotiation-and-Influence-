@@ -325,7 +325,6 @@ function startCarNegotiation(carType) {
   `;
   negImg.src = `${carType}.png`;
   offerIn.placeholder = "Enter your car offer (£)";
-  // Immediate accept
   document.getElementById('accept-offer').textContent =
     `Accept $${initialPrice.toLocaleString()}`;
 }
@@ -376,7 +375,6 @@ function startAINegotiation() {
   sellerDlg.innerHTML = `🤖 EXO-9: I demand ${aiState.demand} units. Your offer?`;
   negImg.src = "exo9.png";
   offerIn.placeholder = "Enter your resource offer (units)";
-  // Immediate accept
   document.getElementById('accept-offer').textContent =
     `Accept ${aiState.demand} units`;
 }
@@ -476,7 +474,6 @@ function handleSalaryOffer() {
     return;
   }
   let counterOffer = 0, accepted = false;
-
   if (salaryRole === 'high') {
     if (offer > employerMax) {
       sellerDlg.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`;
@@ -493,13 +490,13 @@ function handleSalaryOffer() {
         return;
       } else {
         counterOffer = Math.floor(Math.random()*(employerMax - offer)+offer);
-        sellerDlg.innerHTML = `Employer: We counter with £${counterOffer.toLocaleString()}.`;
+        sellerDlg.innerHTML = `Employer: Counter with £${counterOffer.toLocaleString()}.`;
       }
     } else {
       const rej = (offer - initialSalaryOffer)/(employerMax-initialSalaryOffer);
       if (Math.random() < rej) {
         counterOffer = Math.floor(Math.random()*(offer - initialSalaryOffer)+initialSalaryOffer);
-        sellerDlg.innerHTML = `Employer: Counter: £${counterOffer.toLocaleString()}.`;
+        sellerDlg.innerHTML = `Employer: Counter with £${counterOffer.toLocaleString()}.`;
       } else {
         accepted = true;
       }
@@ -514,25 +511,21 @@ function handleSalaryOffer() {
     if (offer > 35000) {
       const rej = (offer - 35000)/(employerMax-35000);
       if (Math.random() < rej) {
-        sellerDlg.innerHTML = `Employer: Too high. Offer rejected.`;
-        finalSalaryOffer = 0;
-        endSalaryNegotiation();
-        return;
+        sellerDlg.innerHTML = `Employer: Too high. Offer rejected.`; finalSalaryOffer=0; endSalaryNegotiation(); return;
       } else {
         counterOffer = Math.floor(Math.random()*(employerMax - offer)+offer);
-        sellerDlg.innerHTML = `Employer: Counter: £${counterOffer.toLocaleString()}.`;
+        sellerDlg.innerHTML = `Employer: Counter with £${counterOffer.toLocaleString()}.`;
       }
     } else {
       const rej = (offer - initialSalaryOffer)/(employerMax-initialSalaryOffer);
       if (Math.random() < rej) {
         counterOffer = Math.floor(Math.random()*(offer - initialSalaryOffer)+initialSalaryOffer);
-        sellerDlg.innerHTML = `Employer: Counter: £${counterOffer.toLocaleString()}.`;
+        sellerDlg.innerHTML = `Employer: Counter with £${counterOffer.toLocaleString()}.`;
       } else {
         accepted = true;
       }
     }
   }
-
   if (accepted) {
     finalSalaryOffer = offer;
     sellerDlg.innerHTML = `Employer: Accepted £${offer.toLocaleString()}.`;
@@ -543,13 +536,11 @@ function handleSalaryOffer() {
 
 function requestIncentiveSalary() {
   if (incentiveRequestsCount >= maxIncentives) {
-    showTemporaryMessage("Max incentive requests reached.");
-    return;
+    showTemporaryMessage("Max incentive requests reached."); return;
   }
   const available = incentivesData.filter(i => !requestedIncentives.includes(i.name));
   if (!available.length) {
-    showTemporaryMessage("No more incentives available.");
-    return;
+    showTemporaryMessage("No more incentives available."); return;
   }
   const div = document.getElementById('salary-incentives');
   div.innerHTML = '';
@@ -566,19 +557,16 @@ function requestIncentiveSalary() {
       const rand = Math.random();
       if (rand < 0.4 && employerRemaining >= cost) {
         requestedIncentives.push(`${incentive.name} (Full)`);
-        incentiveBonus += value;
-        employerRemaining -= cost;
+        incentiveBonus += value; employerRemaining -= cost;
         sellerDlg.innerHTML = `Employer: ${incentive.name} approved full.`;
       } else if (rand < 0.7 && employerRemaining >= cost/2) {
         requestedIncentives.push(`${incentive.name} (Partial)`);
-        incentiveBonus += Math.floor(value*0.5);
-        employerRemaining -= Math.floor(cost/2);
+        incentiveBonus += Math.floor(value*0.5); employerRemaining -= Math.floor(cost/2);
         sellerDlg.innerHTML = `Employer: ${incentive.name} approved partial.`;
       } else {
         sellerDlg.innerHTML = `Employer: ${incentive.name} cannot be accommodated.`;
       }
-      div.innerHTML = '';
-      div.classList.add('hidden');
+      div.innerHTML = ''; div.classList.add('hidden');
       incentiveRequestsCount++;
     });
     div.appendChild(btn);
@@ -605,12 +593,9 @@ function acceptSalaryOffer() {
 function endSalaryNegotiation() {
   const range = employerMax - initialSalaryOffer;
   const gain = finalSalaryOffer - initialSalaryOffer;
-  const pct = range > 0 ? Math.round((gain/range)*100) : 0;
-  bonusBaseScore = pct;
-  bonusScenarioType = currentScenario;
-  bonusFinalValue = finalSalaryOffer;
-  createConfetti();
-  renderOutcomeScreen(finalSalaryOffer, pct);
+  const pct = range > 0 ? Math.round((gain / range)*100) : 0;
+  bonusBaseScore = pct; bonusScenarioType = currentScenario; bonusFinalValue = finalSalaryOffer;
+  createConfetti(); renderOutcomeScreen(finalSalaryOffer, pct);
 }
 
 // ----------------------------
@@ -635,10 +620,8 @@ function renderOutcomeScreen(finalValue, scorePct) {
   }
 }
 
-// Proceed to bonus
-toBonusBtn.addEventListener('click', () => {
-  showBonusQuestion();
-});
+// ---- FIX: Proceed to Bonus Button Listener ----
+toBonusBtn.addEventListener('click', showBonusQuestion);
 
 // ----------------------------
 // Bonus Question Phase
@@ -659,7 +642,7 @@ function showBonusQuestion() {
     btn.className = 'option-btn';
     btn.textContent = text;
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.option-btn').forEach(x => x.disabled = true);
+      document.querySelectorAll('.option-btn').forEach(x=>x.disabled = true);
       let finalScore = bonusBaseScore;
       if (idx === q.correctIndex) {
         finalScore = Math.round(bonusBaseScore*1.2);
@@ -669,19 +652,12 @@ function showBonusQuestion() {
         bonusTextEl.textContent += `\n\n❌ Wrong. ${q.correctAnswerText}\nFinal Score: ${finalScore}%`;
         btn.classList.add('wrong');
       }
-      // high-scores only updated after bonus
-      if (bonusScenarioType === 'buy-car') {
-        if (finalScore > highScores["Buy a Car"][currentCar]) {
-          highScores["Buy a Car"][currentCar] = finalScore;
-        }
-      } else if (bonusScenarioType === 'rogue-ai') {
-        if (finalScore > highScores["Rogue AI Negotiation"]) {
-          highScores["Rogue AI Negotiation"] = finalScore;
-        }
-      } else {
-        if (finalScore > highScores["Salary Negotiation"]) {
-          highScores["Salary Negotiation"] = finalScore;
-        }
+      if (bonusScenarioType==='buy-car' && finalScore>highScores["Buy a Car"][currentCar]) {
+        highScores["Buy a Car"][currentCar]=finalScore;
+      } else if (bonusScenarioType==='rogue-ai' && finalScore>highScores["Rogue AI Negotiation"]) {
+        highScores["Rogue AI Negotiation"]=finalScore;
+      } else if (bonusScenarioType==='salary-negotiation' && finalScore>highScores["Salary Negotiation"]) {
+        highScores["Salary Negotiation"]=finalScore;
       }
       saveHighScores();
       bonusConfBtn.classList.remove('hidden');
@@ -690,59 +666,40 @@ function showBonusQuestion() {
   });
 }
 
-bonusConfBtn.addEventListener('click', () => {
-  switchScreen('congrats');
-});
+bonusConfBtn.addEventListener('click', ()=>switchScreen('congrats'));
 
 // ----------------------------
-// High Scores Display & Reset
+// High Scores & Reset
 // ----------------------------
 function updateHighScoresDisplay() {
-  let text = `Buy a Car:\n`;
-  const labels = { new_car: "New Car", old_car: "Old Car", antique: "Antique Car" };
+  let txt = `Buy a Car:\n`;
+  const labels={new_car:"New Car",old_car:"Old Car",antique:"Antique Car"};
   for (const c in highScores["Buy a Car"]) {
-    text += `  ${labels[c]}: ${highScores["Buy a Car"][c]}%\n`;
+    txt+=`  ${labels[c]}: ${highScores["Buy a Car"][c]}%\n`;
   }
-  text += `\nRogue AI Negotiation: ${highScores["Rogue AI Negotiation"]}%\n`;
-  text += `\nSalary Negotiation: ${highScores["Salary Negotiation"]}%\n`;
-  highScoresEl.textContent = text;
+  txt+=`\nRogue AI Negotiation: ${highScores["Rogue AI Negotiation"]}%\n`;
+  txt+=`\nSalary Negotiation: ${highScores["Salary Negotiation"]}%\n`;
+  highScoresEl.textContent = txt;
 }
 
 function showResetConfirmation() {
-  const overlay = document.createElement('div');
-  overlay.id = 'reset-confirmation-overlay';
-  const modal = document.createElement('div');
-  modal.id = 'reset-confirmation-modal';
-  modal.innerHTML = `<p>Reset all High Scores?</p>`;
-  const yes = document.createElement('button');
-  yes.textContent = 'Yes';
-  const no = document.createElement('button');
-  no.textContent = 'No';
-  modal.appendChild(yes);
-  modal.appendChild(no);
-  overlay.appendChild(modal);
+  const overlay=document.createElement('div'); overlay.id='reset-confirmation-overlay';
+  const modal=document.createElement('div'); modal.id='reset-confirmation-modal';
+  modal.innerHTML=`<p>Reset all High Scores?</p>`;
+  const yes=document.createElement('button'); yes.textContent='Yes';
+  const no=document.createElement('button'); no.textContent='No';
+  modal.appendChild(yes); modal.appendChild(no); overlay.appendChild(modal);
   document.body.appendChild(overlay);
-
-  const autoRemove = setTimeout(() => {
-    if (document.body.contains(overlay)) document.body.removeChild(overlay);
-  }, 15000);
-
-  yes.addEventListener('click', () => {
-    clearTimeout(autoRemove);
-    highScores["Buy a Car"].new_car = 0;
-    highScores["Buy a Car"].old_car = 0;
-    highScores["Buy a Car"].antique = 0;
-    highScores["Rogue AI Negotiation"] = 0;
-    highScores["Salary Negotiation"] = 0;
-    saveHighScores();
-    updateHighScoresDisplay();
-    document.body.removeChild(overlay);
-    showTemporaryMessage("High Scores reset", 2000);
+  const tm=setTimeout(()=>{ if(document.body.contains(overlay)) document.body.removeChild(overlay); },15000);
+  yes.addEventListener('click',()=>{
+    clearTimeout(tm);
+    ["new_car","old_car","antique"].forEach(k=>highScores["Buy a Car"][k]=0);
+    highScores["Rogue AI Negotiation"]=0; highScores["Salary Negotiation"]=0;
+    saveHighScores(); updateHighScoresDisplay(); document.body.removeChild(overlay);
+    showTemporaryMessage("High Scores reset",2000);
   });
-
-  no.addEventListener('click', () => {
-    clearTimeout(autoRemove);
-    document.body.removeChild(overlay);
+  no.addEventListener('click',()=>{
+    clearTimeout(tm); document.body.removeChild(overlay);
   });
 }
 
@@ -750,23 +707,13 @@ function showResetConfirmation() {
 // Reset Utility
 // ----------------------------
 function resetState() {
-  currentScenario = null;
-  currentCar = null;
-  initialPrice = 0;
-  minPrice = 0;
-  negotiationAttempts = 0;
-  salaryRole = "";
-  initialSalaryOffer = 0;
-  employerMax = 0;
-  employerRemaining = 0;
-  finalSalaryOffer = 0;
-  incentiveBonus = 0;
-  requestedIncentives = [];
-  incentiveRequestsCount = 0;
-  aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0 };
-  offerIn.value = '';
-  document.getElementById('ai-options').classList.add('hidden');
+  currentScenario=null; currentCar=null;
+  initialPrice=minPrice=0; negotiationAttempts=0;
+  salaryRole=""; initialSalaryOffer=employerMax=0;
+  employerRemaining=0; finalSalaryOffer=0;
+  incentiveBonus=0; requestedIncentives=[]; incentiveRequestsCount=0;
+  aiState={round:0,demand:100,minRequired:60,lastDemand:0};
+  offerIn.value=''; document.getElementById('ai-options').classList.add('hidden');
   document.getElementById('salary-incentives').classList.add('hidden');
   resetOfferButtons();
 }
-
