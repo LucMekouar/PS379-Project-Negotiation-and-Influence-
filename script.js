@@ -769,3 +769,4 @@ function resetState() {
   document.getElementById('salary-incentives').classList.add('hidden');
   resetOfferButtons();
 }
+
