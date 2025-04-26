@@ -1,9 +1,9 @@
+/* styles.css */
 :root {
   --primary-color: #2A2A2A;
   --accent-color: #FF6B6B;
   --background-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   --text-primary: #FFFFFF;
-  --text-secondary: #CCCCCC;
   --button-hover: #FF5252;
   --card-bg: rgba(255, 255, 255, 0.1);
   --border-radius: 15px;
@@ -72,7 +72,7 @@ button:hover {
   display: none !important;
 }
 
-/* Center scenario buttons */
+/* Scenario buttons */
 .scenario-buttons-wrapper {
   display: flex;
   justify-content: center;
@@ -81,31 +81,22 @@ button:hover {
   margin-bottom: 2rem;
 }
 
-/* Car Selection */
+/* Car grid */
 .car-options-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
   margin: 2rem 0;
 }
-
-.car-option {
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-.car-option:hover {
-  transform: translateY(-5px);
-}
-
+.car-option { cursor: pointer; transition: transform 0.2s; }
+.car-option:hover { transform: translateY(-5px); }
 .car-option img {
   width: 100%;
   max-width: 180px;
-  height: auto;
-  display: block;
   margin: 0 auto 0.5rem;
 }
 
-/* Salary Role Selection */
+/* Salary role */
 #salary-role-selection {
   margin: 2rem 0;
   padding: 1rem;
@@ -119,15 +110,14 @@ button:hover {
 /* Back Buttons */
 .back-button {
   margin-top: 2rem;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255,255,255,0.1) !important;
 }
 
-/* Negotiation Screen */
+/* Negotiation */
 .negotiation-container {
   max-width: 800px;
   margin: 0 auto;
 }
-
 .negotiation-car-img {
   width: 80%;
   max-width: 300px;
@@ -135,15 +125,15 @@ button:hover {
   border-radius: var(--border-radius);
 }
 
-/* Seller Bubble */
+/* Seller bubble */
 #seller-bubble {
   display: flex;
   align-items: center;
   padding: 1.5rem;
-  position: relative;
   background: rgba(255,255,255,0.9);
   color: var(--primary-color);
   border-radius: var(--border-radius);
+  position: relative;
 }
 .seller-avatar img {
   width: 60px;
@@ -157,36 +147,27 @@ button:hover {
   position: absolute;
   left: -15px;
   top: 40px;
-  width: 0;
-  height: 0;
   border: 15px solid transparent;
-  border-right-color: rgba(255, 255, 255, 0.9);
-  border-left: 0;
-  border-top: 0;
+  border-right-color: rgba(255,255,255,0.9);
 }
 
-/* Player Bubble */
+/* Player bubble */
 #player-bubble {
-  position: relative;
   padding: 1.5rem;
-  border-radius: var(--border-radius);
   background: var(--accent-color);
-  color: #fff;
+  color: white;
+  border-radius: var(--border-radius);
   margin-top: 1rem;
+  position: relative;
 }
 #player-bubble::before {
   content: '';
   position: absolute;
   right: -15px;
   top: 20px;
-  width: 0;
-  height: 0;
   border: 15px solid transparent;
   border-left-color: var(--accent-color);
-  border-right: 0;
-  border-top: 0;
 }
-
 #offer-input {
   padding: 1rem;
   border: 2px solid var(--accent-color);
@@ -207,45 +188,41 @@ button:hover {
 .offer-buttons {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
   flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
 /* AI / Salary extras */
-#ai-options,
-#salary-incentives {
+#ai-options, #salary-incentives {
   margin-top: 1rem;
 }
-#ai-options button,
-#salary-incentives button {
+#ai-options button, #salary-incentives button {
   margin: 0.5rem;
 }
 
-/* Outcome Screen */
+/* Outcome screen */
 #outcome-screen {
   background: var(--card-bg);
   padding: 2rem;
   border-radius: var(--border-radius);
   margin: 2rem 0;
   color: var(--text-primary);
-  text-align: center;
 }
-.outcome-img {
+.outcome-content img {
   width: 80%;
   max-width: 300px;
-  border-radius: var(--border-radius);
   margin: 1rem 0;
+  border-radius: var(--border-radius);
 }
 #outcome-text {
   margin: 1rem 0;
-  line-height: 1.4;
+  white-space: pre-wrap;
 }
 #outcome-continue {
   margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
 }
 
-/* Bonus Question */
+/* Bonus question */
 #bonus-question {
   background: var(--card-bg);
   padding: 2rem;
@@ -275,12 +252,8 @@ button:hover {
 #bonus-options button:hover {
   background: rgba(255,255,255,0.2);
 }
-#bonus-options button.correct {
-  background: #4ecdc4;
-}
-#bonus-options button.wrong {
-  background: #ff5252;
-}
+#bonus-options button.correct { background: #4ecdc4; }
+#bonus-options button.wrong   { background: #ff5252; }
 #bonus-confirm {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
@@ -315,7 +288,7 @@ button:hover {
 }
 #high-scores-text {
   font-family: 'Courier New', monospace;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0,0,0,0.3);
   padding: 1.5rem;
   border-radius: var(--border-radius);
   text-align: left;
@@ -328,7 +301,7 @@ button:hover {
   justify-content: center;
 }
 
-/* Responsive tweaks */
+/* Responsive */
 @media (max-width: 768px) {
   #offer-input { width: 100%; margin-bottom: 1rem; }
   .offer-buttons { justify-content: center; }
