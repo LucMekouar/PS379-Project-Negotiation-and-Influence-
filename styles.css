@@ -1,174 +1,326 @@
+/* styles.css */
 :root {
   --primary-color: #2A2A2A;
   --accent-color: #FF6B6B;
   --background-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   --text-primary: #FFFFFF;
+  --text-secondary: #CCCCCC;
   --button-hover: #FF5252;
-  --card-bg: rgba(255,255,255,0.1);
+  --card-bg: rgba(255, 255, 255, 0.1);
   --border-radius: 15px;
-  --box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  font-family:'Poppins',sans-serif;
-  background:var(--background-gradient);
-  color:var(--text-primary);
-  min-height:100vh;
-  display:flex;justify-content:center;align-items:center;
+  font-family: 'Poppins', sans-serif;
+  background: var(--background-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.5;
+  padding: 1rem;
 }
 
 #game-container {
-  width:95%;max-width:1200px;
-  padding:2rem;text-align:center;
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem;
+  text-align: center;
 }
 
-h1,h2 {
-  margin-bottom:1.5rem;
-  text-shadow:2px 2px 4px rgba(0,0,0,0.3);
+h1, h2 {
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  word-wrap: break-word;
 }
 h1 {
-  font-size:2.5rem;
-  color:var(--accent-color);
-  letter-spacing:1.5px;
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  letter-spacing: 1.5px;
 }
 
 button {
-  font-family:'Poppins',sans-serif;
-  font-weight:500;
-  padding:1rem 2rem;
-  border:none;
-  border-radius:50px;
-  cursor:pointer;
-  transition:all 0.3s ease;
-  background:var(--accent-color);
-  color:white;
-  box-shadow:var(--box-shadow);
-  margin:0.5rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--accent-color);
+  color: white;
+  box-shadow: var(--box-shadow);
+  margin: 0.5rem;
+  white-space: nowrap;
 }
+
 button:hover {
-  background:var(--button-hover);
-  transform:translateY(-2px);
-  box-shadow:0 6px 20px rgba(255,82,82,0.4);
+  background: var(--button-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,82,82,0.4);
 }
 
-.hidden { display:none !important; }
+.hidden {
+  display: none !important;
+}
 
-/* Center scenario buttons */
+/* Center the scenario buttons */
 .scenario-buttons-wrapper {
-  display:flex;justify-content:center;flex-wrap:wrap;gap:1rem;
-  margin-bottom:2rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-/* Car grid */
+/* Car Selection */
 .car-options-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:2rem;margin:2rem 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
 }
-.car-option img { width:100%;max-width:200px;display:block;margin:0 auto; }
 
-/* Salary Role */
+.car-option {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.car-option:hover {
+  transform: translateY(-5px);
+}
+
+.car-option img {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  display: block;
+  margin: 0 auto 0.5rem;
+}
+
+/* Salary Role Selection */
 #salary-role-selection {
-  margin:2rem 0;padding:1rem;
-  background:var(--card-bg);
-  border-radius:var(--border-radius);
+  margin: 2rem 0;
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
 }
-#salary-role-selection p { margin-bottom:1rem; }
+#salary-role-selection p {
+  margin-bottom: 1rem;
+}
 
-/* Back button */
+/* Back Buttons */
 .back-button {
-  background:rgba(255,255,255,0.1) !important;
+  margin-top: 2rem;
+  background: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Negotiation */
-.negotiation-container { max-width:800px;margin:0 auto; }
+/* Negotiation Screen */
+.negotiation-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .negotiation-car-img {
-  width:100%;max-width:300px;
-  margin:0 auto 1rem;
-  border-radius:var(--border-radius);
+  width: 80%;
+  max-width: 300px;
+  margin: 0 auto 1rem;
+  border-radius: var(--border-radius);
 }
-#seller-bubble,#player-bubble {
-  position:relative;
-  padding:1.5rem;
-  border-radius:var(--border-radius);
-  background:rgba(255,255,255,0.9);
-  color:var(--primary-color);
+
+/* Seller Bubble */
+#seller-bubble {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  position: relative;
+  background: rgba(255,255,255,0.9);
+  color: var(--primary-color);
+  border-radius: var(--border-radius);
 }
+
+.seller-avatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+
+#seller-bubble::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 40px;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+  border-right-color: rgba(255, 255, 255, 0.9);
+  border-left: 0;
+  border-top: 0;
+}
+
+/* Player Bubble */
 #player-bubble {
-  background:var(--accent-color);
-  color:#fff;
+  position: relative;
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  background: var(--accent-color);
+  color: #fff;
+  margin-top: 1rem;
 }
+
+#player-bubble::before {
+  content: '';
+  position: absolute;
+  right: -15px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border: 15px solid transparent;
+  border-left-color: var(--accent-color);
+  border-right: 0;
+  border-top: 0;
+}
+
+#offer-input {
+  padding: 1rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 50px;
+  background: transparent;
+  color: white;
+  font-size: 1.05rem;
+  margin-right: 1rem;
+  width: calc(100% - 130px);
+  max-width: 300px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#offer-input:focus {
+  outline: none;
+  border-color: var(--button-hover);
+  box-shadow: 0 0 8px rgba(255,82,82,0.5);
+}
+
 .offer-buttons {
-  display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-/* Salary-negotiation buttons */
-.salary-button {
-  background:#2A2A2A;color:#fff;
+/* AI / Salary extras containers */
+#ai-options,
+#salary-incentives {
+  margin-top: 1rem;
 }
-.salary-button:hover {
-  background:var(--button-hover);
+#ai-options button,
+#salary-incentives button {
+  margin: 0.5rem;
 }
 
-/* Bonus Question */
+/* Bonus Question Styles */
 #bonus-question {
-  background:var(--card-bg);
-  padding:2rem;
-  border-radius:var(--border-radius);
-  margin:2rem 0;
-  color:var(--text-primary);
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
+  color: var(--text-primary);
 }
-#bonus-text { white-space:pre-wrap; }
-.option-btn {
-  background:var(--card-bg);
-  color:var(--text-primary);
-  border:1px solid var(--button-hover);
-  padding:0.75rem 1rem;
-  border-radius:8px;
-  display:block;
-  width:80%;
-  margin:0.5rem auto;
-  transition:background 0.2s;
-}
-.option-btn.correct { background:#4ecdc4; }
-.option-btn.wrong   { background:#ff5252; }
-.option-btn:hover   { background:rgba(255,255,255,0.2); }
 
-/* Congratulations */
+#bonus-text {
+  white-space: pre-wrap;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+#bonus-options button {
+  display: block;
+  width: 80%;
+  max-width: 350px;
+  margin: 0.5rem auto;
+  padding: 0.75rem;
+  border: 1px solid var(--button-hover);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+#bonus-options button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+#bonus-options button.correct {
+  background: #4ecdc4;
+}
+
+#bonus-options button.wrong {
+  background: #ff5252;
+}
+
+#bonus-confirm {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+}
+
+/* Congratulations Screen */
 #congratulations {
-  background:var(--card-bg);
-  padding:3rem;
-  border-radius:var(--border-radius);
-  margin:2rem 0;
+  background: var(--card-bg);
+  padding: 3rem;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
 }
+
 #car-image {
-  width:100%;max-width:400px;
-  border-radius:var(--border-radius);
-  margin:2rem 0;
-  animation:float 3s ease-in-out infinite;
+  width: 80%;
+  max-width: 400px;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
+  animation: float 3s ease-in-out infinite;
 }
+
 @keyframes float {
-  0%   {transform:translateY(0);}
-  50%  {transform:translateY(-20px);}
-  100% {transform:translateY(0);}
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
 }
 
 /* High Scores */
 #high-scores {
-  background:var(--card-bg);
-  padding:2rem;border-radius:var(--border-radius);
-  margin:2rem 0;
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  margin: 2rem 0;
 }
+
 #high-scores-text {
-  font-family:'Courier New',monospace;
-  background:rgba(0,0,0,0.3);
-  padding:1.5rem;
-  border-radius:var(--border-radius);
-  text-align:left;
-  white-space:pre-wrap;
+  font-family: 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  text-align: left;
+  white-space: pre-wrap;
 }
+
 .button-group {
-  display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  #offer-input { width: 100%; margin-bottom: 1rem; }
+  .offer-buttons { justify-content: center; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
 }
