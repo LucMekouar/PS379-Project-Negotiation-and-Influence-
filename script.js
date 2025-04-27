@@ -40,7 +40,7 @@ let aiState = { round: 0, demand: 100, minRequired: 60, lastDemand: 0 };
 let bonusBaseScore = 0;
 let bonusScenarioType = "";
 let bonusFinalValue = 0;
-let newHighScore = false;        // flag for new high score in bonus
+let newHighScore = false;
 
 // Pool of bonus questions
 const questionPool = [
@@ -114,15 +114,15 @@ const highScores = JSON.parse(localStorage.getItem('highScores')) || {
 // Cached DOM Elements
 // ----------------------------
 const screens = {
-  initial:    document.getElementById('initial-screen'),
-  scenarios:  document.getElementById('scenario-selection'),
-  carSelect:  document.getElementById('car-selection'),
-  salaryRole: document.getElementById('salary-role-selection'),
-  negotiation:document.getElementById('negotiation'),
-  outcome:    document.getElementById('outcome-screen'),
-  bonus:      document.getElementById('bonus-question'),
-  congrats:   document.getElementById('congratulations'),
-  highScores: document.getElementById('high-scores')
+  initial:     document.getElementById('initial-screen'),
+  scenarios:   document.getElementById('scenario-selection'),
+  carSelect:   document.getElementById('car-selection'),
+  salaryRole:  document.getElementById('salary-role-selection'),
+  negotiation: document.getElementById('negotiation'),
+  outcome:     document.getElementById('outcome-screen'),
+  bonus:       document.getElementById('bonus-question'),
+  congrats:    document.getElementById('congratulations'),
+  highScores:  document.getElementById('high-scores')
 };
 
 const startBtn     = document.getElementById('start-button');
@@ -169,6 +169,21 @@ function showInputError(input, msg) {
     input.placeholder = orig;
     input.style.borderColor = 'var(--accent-color)';
   }, 2000);
+}
+
+// ** New: show a popup with the correct answer **
+function showAnswerPopup(text, onContinue) {
+  const overlay = document.createElement('div');
+  overlay.id = 'answer-popup-overlay';
+  const modal = document.createElement('div');
+  modal.id = 'answer-popup-modal';
+  modal.innerHTML = `<p>${text}</p><button id="popup-continue">Continue</button>`;
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  document.getElementById('popup-continue').addEventListener('click', () => {
+    document.body.removeChild(overlay);
+    onContinue();
+  });
 }
 
 function showTemporaryMessage(message, duration = 2000) {
@@ -275,13 +290,13 @@ highBtn.addEventListener('click', () => {
 backBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const id = btn.id;
-    if (id === 'back-to-initial-from-scenarios')       switchScreen('initial');
-    else if (id === 'back-to-scenarios-from-high-scores') switchScreen('scenarios');
-    else if (id === 'back-to-scenarios')               switchScreen('scenarios');
-    else if (id === 'back-to-scenarios-from-salary-role') switchScreen('scenarios');
+    if (id === 'back-to-initial-from-scenarios')            switchScreen('initial');
+    else if (id === 'back-to-scenarios-from-high-scores')  switchScreen('scenarios');
+    else if (id === 'back-to-scenarios')                    switchScreen('scenarios');
+    else if (id === 'back-to-scenarios-from-salary-role')   switchScreen('scenarios');
     else if (id === 'back-to-car-selection') {
       if (currentScenario === 'buy-car') switchScreen('carSelect');
-      else                                switchScreen('scenarios');
+      else                               switchScreen('scenarios');
       resetState();
     }
     else if (id === 'back-to-scenarios-from-congrats') { 
@@ -289,7 +304,7 @@ backBtns.forEach(btn => {
     }
     else if (id === 'back-to-car-selection-from-congrats') {
       if (currentScenario === 'buy-car') switchScreen('carSelect');
-      else                                switchScreen('scenarios');
+      else                               switchScreen('scenarios');
       resetState();
     }
   });
@@ -356,9 +371,9 @@ function handleCarOffer(offer) {
 
 function endNegotiation(finalValue) {
   const range = initialPrice - minPrice;
-  bonusBaseScore  = range > 0 ? Math.round((initialPrice - finalValue) / range * 100) : 0;
+  bonusBaseScore = range > 0 ? Math.round((initialPrice - finalValue) / range * 100) : 0;
   bonusScenarioType = currentScenario;
-  bonusFinalValue   = finalValue;
+  bonusFinalValue = finalValue;
   renderOutcomeScreen(finalValue);
 }
 
@@ -568,7 +583,7 @@ function acceptSalaryOffer() {
 function endSalaryNegotiation() {
   const range = employerMax - initialSalaryOffer;
   const gain  = finalSalaryOffer - initialSalaryOffer;
-  bonusBaseScore = range > 0 ? Math.round((gain / range) * 100) : 0;
+  bonusBaseScore  = range > 0 ? Math.round((gain / range) * 100) : 0;
   bonusScenarioType = currentScenario;
   bonusFinalValue   = finalSalaryOffer;
   renderOutcomeScreen(finalSalaryOffer);
@@ -640,7 +655,7 @@ function showBonusQuestion() {
           highScores["Rogue AI Negotiation"] = finalScore;
           newHighScore = true;
         }
-      } else { // salary-negotiation
+      } else {
         if (finalScore > highScores["Salary Negotiation"][salaryRole]) {
           highScores["Salary Negotiation"][salaryRole] = finalScore;
           newHighScore = true;
@@ -648,7 +663,7 @@ function showBonusQuestion() {
       }
       saveHighScores();
 
-      // Display final score and branch high score in congrats
+      // Prepare final scores display
       let branchHigh;
       if (bonusScenarioType === 'buy-car') {
         branchHigh = highScores["Buy a Car"][currentCar];
@@ -657,27 +672,28 @@ function showBonusQuestion() {
       } else {
         branchHigh = highScores["Salary Negotiation"][salaryRole];
       }
-      scoreTextEl.textContent = 
-        `Your total score: ${finalScore}%\nHigh Score: ${branchHigh}%`;
+      // show both base and bonus, bonus in bold
+      scoreTextEl.innerHTML = 
+        `Base Score: ${bonusBaseScore}%<br>` +
+        `<strong>Bonus Score: ${finalScore}%</strong><br>` +
+        `High Score: ${branchHigh}%`;
 
-      // Set congrats image per scenario
+      // Store which image to use in congrats
       congratsImg.src = bonusScenarioType === 'rogue-ai'
         ? 'exo9.png'
         : (bonusScenarioType === 'buy-car'
            ? `${currentCar}.png`
-           : 'employer-interview_picture.png'
-          );
+           : 'employer-interview_picture.png');
 
-      bonusConfBtn.classList.remove('hidden');
+      // **New**: show the correct-answer popup, then final screen
+      showAnswerPopup(q.correctAnswerText, () => {
+        if (newHighScore) createConfetti();
+        switchScreen('congrats');
+      });
     });
     bonusOptsEl.appendChild(btn);
   });
 }
-
-bonusConfBtn.addEventListener('click', () => {
-  if (newHighScore) createConfetti();
-  switchScreen('congrats');
-});
 
 // ----------------------------
 // High Scores Display & Reset
