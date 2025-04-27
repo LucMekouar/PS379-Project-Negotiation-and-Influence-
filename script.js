@@ -171,7 +171,7 @@ function showInputError(input, msg) {
   }, 2000);
 }
 
-// ** New: show a popup with the correct answer **
+// Show popup with the correct answer
 function showAnswerPopup(text, onContinue) {
   const overlay = document.createElement('div');
   overlay.id = 'answer-popup-overlay';
@@ -296,7 +296,7 @@ backBtns.forEach(btn => {
     else if (id === 'back-to-scenarios-from-salary-role')   switchScreen('scenarios');
     else if (id === 'back-to-car-selection') {
       if (currentScenario === 'buy-car') switchScreen('carSelect');
-      else                               switchScreen('scenarios');
+      else                                switchScreen('scenarios');
       resetState();
     }
     else if (id === 'back-to-scenarios-from-congrats') { 
@@ -304,7 +304,7 @@ backBtns.forEach(btn => {
     }
     else if (id === 'back-to-car-selection-from-congrats') {
       if (currentScenario === 'buy-car') switchScreen('carSelect');
-      else                               switchScreen('scenarios');
+      else                                switchScreen('scenarios');
       resetState();
     }
   });
@@ -369,9 +369,23 @@ function handleCarOffer(offer) {
   }
 }
 
+// ----------------------------
+// Modified endNegotiation to handle rogue-ai scores correctly
+// ----------------------------
 function endNegotiation(finalValue) {
-  const range = initialPrice - minPrice;
-  bonusBaseScore = range > 0 ? Math.round((initialPrice - finalValue) / range * 100) : 0;
+  if (currentScenario === 'rogue-ai') {
+    // Score based on how far below initial demand you got (minRequired to demand)
+    bonusBaseScore = Math.round(
+      (aiState.demand - finalValue) /
+      (aiState.demand - aiState.minRequired) * 100
+    );
+  } else {
+    // Car negotiation score
+    const range = initialPrice - minPrice;
+    bonusBaseScore = range > 0
+      ? Math.round((initialPrice - finalValue) / range * 100)
+      : 0;
+  }
   bonusScenarioType = currentScenario;
   bonusFinalValue = finalValue;
   renderOutcomeScreen(finalValue);
@@ -478,13 +492,13 @@ function handleSalaryOffer() {
   let counterOffer = 0, accepted = false;
   if (salaryRole === 'high') {
     if (offer > employerMax) {
-      sellerDlg.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`;
+      sellerDlg.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`; 
       finalSalaryOffer = 0; endSalaryNegotiation(); return;
     }
     if (offer > 50000) {
       const rej = (offer - 50000)/(employerMax - 50000);
       if (Math.random() < rej) {
-        sellerDlg.innerHTML = `Employer: Your demand is too high. Offer rejected.`;
+        sellerDlg.innerHTML = `Employer: Your demand is too high. Offer rejected.`; 
         finalSalaryOffer = 0; endSalaryNegotiation(); return;
       } else {
         counterOffer = Math.floor(Math.random()*(employerMax - offer)+offer);
@@ -499,13 +513,13 @@ function handleSalaryOffer() {
     }
   } else {
     if (offer > employerMax) {
-      sellerDlg.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`;
+      sellerDlg.innerHTML = `Employer: That exceeds our maximum budget. Offer rejected.`; 
       finalSalaryOffer = 0; endSalaryNegotiation(); return;
     }
     if (offer > 35000) {
       const rej = (offer - 35000)/(employerMax-35000);
       if (Math.random() < rej) {
-        sellerDlg.innerHTML = `Employer: Too high. Offer rejected.`;
+        sellerDlg.innerHTML = `Employer: Too high. Offer rejected.`; 
         finalSalaryOffer = 0; endSalaryNegotiation(); return;
       } else {
         counterOffer = Math.floor(Math.random()*(employerMax - offer)+offer);
@@ -549,13 +563,13 @@ function requestIncentiveSalary() {
       if (rand < 0.4 && employerRemaining >= cost) {
         requestedIncentives.push(`${incentive.name} (Full)`);
         incentiveBonus += value; employerRemaining -= cost;
-        sellerDlg.innerHTML = `Employer: ${incentive.name} approved full.`;  
+        sellerDlg.innerHTML = `Employer: ${incentive.name} approved full.`;
       } else if (rand < 0.7 && employerRemaining >= cost/2) {
         requestedIncentives.push(`${incentive.name} (Partial)`);
         incentiveBonus += Math.floor(value*0.5); employerRemaining -= Math.floor(cost/2);
-        sellerDlg.innerHTML = `Employer: ${incentive.name} approved partial.`;  
+        sellerDlg.innerHTML = `Employer: ${incentive.name} approved partial.`;
       } else {
-        sellerDlg.innerHTML = `Employer: ${incentive.name} cannot be accommodated.`;  
+        sellerDlg.innerHTML = `Employer: ${incentive.name} cannot be accommodated.`;
       }
       div.innerHTML = ''; div.classList.add('hidden');
       incentiveRequestsCount++;
@@ -583,7 +597,7 @@ function acceptSalaryOffer() {
 function endSalaryNegotiation() {
   const range = employerMax - initialSalaryOffer;
   const gain  = finalSalaryOffer - initialSalaryOffer;
-  bonusBaseScore  = range > 0 ? Math.round((gain / range) * 100) : 0;
+  bonusBaseScore = range > 0 ? Math.round((gain / range) * 100) : 0;
   bonusScenarioType = currentScenario;
   bonusFinalValue   = finalSalaryOffer;
   renderOutcomeScreen(finalSalaryOffer);
@@ -672,20 +686,21 @@ function showBonusQuestion() {
       } else {
         branchHigh = highScores["Salary Negotiation"][salaryRole];
       }
-      // show both base and bonus, bonus in bold
+
+      // Show both base and bonus, bonus in bold
       scoreTextEl.innerHTML = 
         `Base Score: ${bonusBaseScore}%<br>` +
         `<strong>Bonus Score: ${finalScore}%</strong><br>` +
         `High Score: ${branchHigh}%`;
 
-      // Store which image to use in congrats
+      // Set congrats image per scenario
       congratsImg.src = bonusScenarioType === 'rogue-ai'
         ? 'exo9.png'
         : (bonusScenarioType === 'buy-car'
            ? `${currentCar}.png`
            : 'employer-interview_picture.png');
 
-      // **New**: show the correct-answer popup, then final screen
+      // Show correct-answer popup then final screen
       showAnswerPopup(q.correctAnswerText, () => {
         if (newHighScore) createConfetti();
         switchScreen('congrats');
