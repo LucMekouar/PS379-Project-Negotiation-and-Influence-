@@ -322,6 +322,9 @@ carOpts.forEach(opt => {
 });
 
 function startCarNegotiation(carType) {
+  // ensure scenario stays in 'buy-car'
+  currentScenario = 'buy-car';
+
   resetOfferButtons();
   currentCar = carType;
   negotiationAttempts = 0;
@@ -597,7 +600,7 @@ function acceptSalaryOffer() {
 function endSalaryNegotiation() {
   const range = employerMax - initialSalaryOffer;
   const gain  = finalSalaryOffer - initialSalaryOffer;
-  bonusBaseScore = range > 0 ? Math.round((gain / range) * 100) : 0;
+  bonusBaseScore  = range > 0 ? Math.round((gain / range) * 100) : 0;
   bonusScenarioType = currentScenario;
   bonusFinalValue   = finalSalaryOffer;
   renderOutcomeScreen(finalSalaryOffer);
