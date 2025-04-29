@@ -10,7 +10,7 @@ This is a web-based **Negotiation Game** developed as part of the **PS379: Negot
 
 ## How to Play  
 
-1. Click on this link to one of my GitHub pages: https://lucmekouar.github.io/PS379-Project-Negotiation-and-Influence-/
+1. Click on this link to a GitHub pages: https://lucmekouar.github.io/PS379-Project-Negotiation-and-Influence-/
 2. Choose a negotiation scenario.  
 3. Make offers and try to strike a deal.  
 4. Different scenarios have different opportunities and challenges.  
