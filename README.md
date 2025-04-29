@@ -17,4 +17,4 @@ This is a web-based **Negotiation Game** developed as part of the **PS379: Negot
 
 This project is part of the final-year coursework submission.  
 
-Credits: Azfar Rahim, Manraj Saluja and Luc Mekouar
+**Credits: Azfar Rahim, Manraj Saluja and Luc Mekouar**
