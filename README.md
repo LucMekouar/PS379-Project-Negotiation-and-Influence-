@@ -1,6 +1,6 @@
 # Negotiation Game  
 
-This is a web-based **Negotiation Game** developed as part of the **PS379: Negotiation and Influence** module at the **University of Warwick (2024-25)**. The game simulates real-world negotiation scenarios where players make offers and try to reach an agreement.  
+This is a web-based **Negotiation Game** developed as part of the **PS379: Negotiation and Influence** module at the **University of Warwick (2024-25)**. The game offers three negotiation scenarios where players make offers and try to reach an agreement. Additional Bonus Questions test the player's knowledge of relevant keywords (MCQ format). 
 
 ## Project Structure  
 
@@ -13,12 +13,7 @@ This is a web-based **Negotiation Game** developed as part of the **PS379: Negot
 1. Click on this link to one of my GitHub pages: https://lucmekouar.github.io/PS379-Project-Negotiation-and-Influence-/
 2. Choose a negotiation scenario.  
 3. Make offers and try to strike a deal.  
-4. Different scenarios have different limits and challenges.  
+4. Different scenarios have different opportunities and challenges.  
 
-This project is part of a final-year coursework submission.  
+This project is part of the final-year coursework submission.  
 
-
-
-## changes to be made:
-1. add option to reset highscores
-2. add additional scenarios
