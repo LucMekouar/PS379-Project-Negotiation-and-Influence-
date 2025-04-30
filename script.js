@@ -338,37 +338,37 @@ function startCarNegotiation(carType) {
   minPrice = initialPrice * (0.75 + Math.random() * 0.1);
   sellerDlg.innerHTML = `
     🤑 Seller: Interested in this ${specs[carType].label}?<br>
-    Initial Price: $${initialPrice.toLocaleString()}
+    Initial Price: £${initialPrice.toLocaleString()}
   `;
   negImg.src = `${carType}.png`;
   offerIn.placeholder = "Enter your car offer (£)";
   document.getElementById('accept-offer').textContent =
-    `Accept $${initialPrice.toLocaleString()}`;
+    `Accept £${initialPrice.toLocaleString()}`;
 }
 
 function handleCarOffer(offer) {
   if (negotiationAttempts > maxAttempts) {
     sellerDlg.innerHTML = `
-      😠 Seller: Too many low offers! Final Price: $${initialPrice.toLocaleString()}
+      😠 Seller: Too many low offers! Final Price: £${initialPrice.toLocaleString()}
     `;
     document.getElementById('accept-offer').textContent =
-      `Accept $${initialPrice.toLocaleString()}`;
+      `Accept £${initialPrice.toLocaleString()}`;
     return;
   }
   if (offer < minPrice * 0.9) {
     const co = Math.floor(Math.random() * (initialPrice - minPrice) + minPrice);
-    sellerDlg.innerHTML = `😠 Seller: Insulting! My best: $${co.toLocaleString()}`;
+    sellerDlg.innerHTML = `😠 Seller: Insulting! My best: £${co.toLocaleString()}`;
     document.getElementById('accept-offer').textContent =
-      `Accept $${co.toLocaleString()}`;
+      `Accept £${co.toLocaleString()}`;
   } else if (offer < minPrice) {
     const co = Math.floor(Math.random() * (minPrice - offer) + offer);
-    sellerDlg.innerHTML = `🤔 Seller: How about $${co.toLocaleString()}?`;
+    sellerDlg.innerHTML = `🤔 Seller: How about £${co.toLocaleString()}?`;
     document.getElementById('accept-offer').textContent =
-      `Accept $${co.toLocaleString()}`;
+      `Accept £${co.toLocaleString()}`;
   } else {
-    sellerDlg.innerHTML = `🎉 Seller: Deal at $${offer.toLocaleString()}!`;
+    sellerDlg.innerHTML = `🎉 Seller: Deal at £${offer.toLocaleString()}!`;
     document.getElementById('accept-offer').textContent =
-      `Accept $${offer.toLocaleString()}`;
+      `Accept £${offer.toLocaleString()}`;
   }
 }
 
